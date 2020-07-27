@@ -12,8 +12,35 @@ let opt = '';
 
 /* Add Questions */
 $(document).on("click", "#add-questions", function () {
+
+    $('.section-2').hide();
+    $('.section-2-footer').hide();
+
+    if ($('form.sec1 > div.question-section').length > 0) {
+        $('form.sec1 > div.question-section').remove();
+        $('form.sec1 > .question_button').remove();
+        $('form.sec1 > div.question-footer').remove();
+    }
+
+    $('form.sec1').append(questions_section);
+    $('form.sec1').append(add_question_button);
+    $('form.sec1').append(question_footer);
+
+    var question_counter = 0;
+    $("div.question-container:visible").each(function (index, elem) {
+        question_counter = index + 1;
+        $(elem)
+            .find("span.question-number")
+            .text(question_counter + ".");
+        $(elem).attr({ id: "question" + question_counter });
+    });
+
+});
+
+$(document).on("click", "#add-questions-same-section", function () {
     var question_counter;
-    $(this).parents("div.container").before(question_section.clone());
+    $('form.sec1').append(questions_section);
+    $('form > .question_button').remove();
 
     $("div.question-container:visible").each(function (index, elem) {
         question_counter = index + 1;
@@ -23,11 +50,25 @@ $(document).on("click", "#add-questions", function () {
         $(elem).attr({ id: "question" + question_counter });
     });
     questionCount++;
+
+    $('form.sec1').append(add_question_button);
+});
+
+$(document).on("click", "#back-question", function () {
+    $(".question-section").hide();
+    $(".add_question_button").hide();
+    $(".question-footer").hide();
+    $(".question_button").hide();
+
+    $(".section-2").show();
+    $(".section-2-footer").show();
 });
 
 /* Remove Questions */
 $(document).on("click", ".remove-question", function () {
     var element = $(this);
+    var data_id = $(this).parents('.question-container').attr('id');
+
     if ($("div.question-container:visible").length > 1) {
         $("#exampleModalCenter")
             .find("#exampleModalLongTitle")
@@ -38,21 +79,10 @@ $(document).on("click", ".remove-question", function () {
         $("#exampleModalCenter")
             .find(".modal-footer")
             .html(
-                '<button type="button" class="btn btn-outline-secondary btn-sm" data-dismiss="modal">Close</button><button type="button" class="btn btn-primary" id="delete-question">Ok</button>'
+                '<button type="button" class="btn btn-outline-secondary btn-sm" data-dismiss="modal">Close</button><button type="button" data-id="' + data_id + '" class="btn btn-primary" id="delete-question">Ok</button>'
             );
         $("#exampleModalCenter").modal("show");
 
-        $(document).on("click", "#delete-question", function () {
-            $("#exampleModalCenter").modal("hide");
-
-            element.parents("div.question-container").remove();
-            var question_counter;
-            $("div.question-container:visible").each(function (index, elem) {
-                question_counter = index + 1;
-                $(elem).find("span.question-number").text(question_counter);
-                $(elem).attr({ id: "question" + question_counter });
-            });
-        });
     } else {
         $("#exampleModalCenter")
             .find("#exampleModalLongTitle")
@@ -67,6 +97,18 @@ $(document).on("click", ".remove-question", function () {
             );
         $("#exampleModalCenter").modal("show");
     }
+});
+
+$(document).on("click", "#delete-question", function () {
+    var element = $(this).attr('data-id');
+    $("#exampleModalCenter").modal("hide");
+    $('#' + element).parents('div.question-section.pt-4').remove();
+    var question_counter;
+    $("div.question-container:visible").each(function (index, elem) {
+        question_counter = index + 1;
+        $(elem).find("span.question-number").text(question_counter);
+        $(elem).attr({ id: "question" + question_counter });
+    });
 });
 
 /* Add Options */
@@ -175,11 +217,218 @@ $(document).on("click", ".remove-option", function (eve) {
     }
 });
 
+$(document).on("click", "#question-done", function () {
+    $('#question-done').prop('disabled', true);
+
+    /* Validate */
+    var error_text = "";
+    var question_number = 0;
+    $("input[type='text']").removeClass("danger");
+    $("label.label-alert").remove();
+    $("div.card-box-alert").removeClass("card-box-alert").addClass("card-box");
+
+    $("form")
+        .find("input[type='text']")
+        .each(function () {
+            var element = $(this);
+            if (element.val() == "") {
+                validate = false;
+
+                $(this)
+                    .parents("div.card-box")
+                    .removeClass("card-box")
+                    .addClass("card-box-alert");
+
+                if (element.attr("id").startsWith("question-title")) {
+                    $(this).addClass("danger");
+                    $(this)
+                        .parents("div.input-group")
+                        .before(
+                            '<label class="label-alert d-block"><small>Required</small></label>'
+                        );
+
+                } else if (element.attr("id").startsWith("option")) {
+                    $(this).addClass("danger");
+                    $(this)
+                        .parents("div.input-group")
+                        .before(
+                            '<label class="label-alert d-block"><small>Required</small></label>'
+                        );
+
+                    error_text +=
+                        "<p>Blank option not allowed for " +
+                        element.attr("placeholder") +
+                        ".</p>";
+                }
+            }
+        });
+
+    var questionCount = $("form").find("div.container.question-container").length;
+    questions = new Array();
+    var error = false;
+    for (var i = 1; i <= questionCount; i++) {
+        var is_selected = 0;
+
+        $("#question" + i)
+            .find("div.option-div")
+            .each(function (index, elem) {
+                var count = index + 1;
+                if (
+                    $("#question" + i)
+                        .find("#check" + count)
+                        .is(":checked")
+                ) {
+                    // if it is checked
+                    is_selected++;
+                }
+            });
+        if (is_selected == 0) {
+            validate = false;
+            $("#question" + i)
+                .find("div.input-group:first")
+                .before(
+                    '<label class="label-alert d-block"><small>Please select correct choice for the question</small></label>'
+                );
+
+            $("#submit").prop('disabled', false);
+
+
+            $("#question" + i)
+                .find("#question-title")
+                .addClass("danger");
+
+            $("#question" + i)
+                .find("div.card-box")
+                .removeClass("card-box")
+                .addClass("card-box-alert");
+            error = true;
+        }
+    }
+
+    if (validate == true && error == false) {
+        /* Create Question Section Here */
+
+    }
+
+    $('#question-done').prop('disabled', false);
+
+});
+
+
+
+/* Add Text */
+$(document).on("click", "#add-text", function () {
+
+    $('.section-2').hide();
+    $('.section-2-footer').hide();
+
+    if ($('form.sec1 > div.text-section').length > 0) {
+        $('form.sec1 > div.text-section').remove();
+        $('form.sec1 > div.text-footer').remove();
+    }
+
+    $('form.sec1').append(add_text_section);
+    $('form.sec1').append(add_text_footer);
+});
+
 $(document).on("click", ".show-setting", function () {
     $(".section-1").hide();
     $(".section-1-footer").hide();
     $("form #setting").show();
 });
+
+$(document).on("click", "#back-text", function () {
+    $(".text-section").hide();
+    $(".text-footer").hide();
+
+    $(".section-2").show();
+    $(".section-2-footer").show();
+});
+
+$(document).on("click", "#text-done", function () {
+    var error_text = "";
+    $("textarea").removeClass('danger');
+    $("label.label-alert").remove();
+
+    if ($("textarea").val().length <= 0) {
+        $("textarea").before(`<label class="label-alert d-block">Required</label>`);
+        $("textarea").focus();
+        $("textarea").addClass('danger');
+    } else {
+        var text_data = $('textarea#training-text').val()
+        $('.text-section').hide();
+        $('.text-footer').hide();
+
+        $('.section-2').show();
+        $('.section-2-footer').show();
+
+        var counter = $("form.sec1 div.section-2:visible div#root .card-box").length;
+
+        $("form.sec1 div.section-2:visible div#root .card-box:last").after(`<div class="card-box card-bg card-border">
+                <div class="form-group">
+                    <div class="hover-btn h-32">
+                        <label><strong><span class="counter">${counter}</span>. <span class="type">Text</span></strong> </label>
+                        <button type="button" class="close remove-text" data-dismiss="alert">
+                            <span aria-hidden="true">
+                                <svg viewBox="-40 0 427 427.00131" xmlns="http://www.w3.org/2000/svg" class="gt gs">
+                                    <path d="m232.398438 154.703125c-5.523438 0-10 4.476563-10 10v189c0 5.519531 4.476562 10 10 10 5.523437 0 10-4.480469 10-10v-189c0-5.523437-4.476563-10-10-10zm0 0"></path>
+                                    <path d="m114.398438 154.703125c-5.523438 0-10 4.476563-10 10v189c0 5.519531 4.476562 10 10 10 5.523437 0 10-4.480469 10-10v-189c0-5.523437-4.476563-10-10-10zm0 0"></path>
+                                    <path d="m28.398438 127.121094v246.378906c0 14.5625 5.339843 28.238281 14.667968 38.050781 9.285156 9.839844 22.207032 15.425781 35.730469 15.449219h189.203125c13.527344-.023438 26.449219-5.609375 35.730469-15.449219 9.328125-9.8125 14.667969-23.488281 14.667969-38.050781v-246.378906c18.542968-4.921875 30.558593-22.835938 28.078124-41.863282-2.484374-19.023437-18.691406-33.253906-37.878906-33.257812h-51.199218v-12.5c.058593-10.511719-4.097657-20.605469-11.539063-28.03125-7.441406-7.421875-17.550781-11.5546875-28.0625-11.46875h-88.796875c-10.511719-.0859375-20.621094 4.046875-28.0625 11.46875-7.441406 7.425781-11.597656 17.519531-11.539062 28.03125v12.5h-51.199219c-19.1875.003906-35.394531 14.234375-37.878907 33.257812-2.480468 19.027344 9.535157 36.941407 28.078126 41.863282zm239.601562 279.878906h-189.203125c-17.097656 0-30.398437-14.6875-30.398437-33.5v-245.5h250v245.5c0 18.8125-13.300782 33.5-30.398438 33.5zm-158.601562-367.5c-.066407-5.207031 1.980468-10.21875 5.675781-13.894531 3.691406-3.675781 8.714843-5.695313 13.925781-5.605469h88.796875c5.210937-.089844 10.234375 1.929688 13.925781 5.605469 3.695313 3.671875 5.742188 8.6875 5.675782 13.894531v12.5h-128zm-71.199219 32.5h270.398437c9.941406 0 18 8.058594 18 18s-8.058594 18-18 18h-270.398437c-9.941407 0-18-8.058594-18-18s8.058593-18 18-18zm0 0"></path>
+                                    <path d="m173.398438 154.703125c-5.523438 0-10 4.476563-10 10v189c0 5.519531 4.476562 10 10 10 5.523437 0 10-4.480469 10-10v-189c0-5.523437-4.476563-10-10-10zm0 0"></path>
+                                </svg>
+                            </span>
+                            <span class="sr-only">Close</span>
+                        </button>
+                    </div>
+                    <div class="clearfix"></div>
+                    <hr>
+                </div>
+                <p class="mb0">${text_data}</p>
+                <textarea class="textarea-text" style="display:none">${text_data}</textarea>
+            </div>`);
+
+
+        $("form.sec1 div.section-2:visible div#root .card-box").each(function (index, obj) {
+            $(this).attr({ 'data-id': 'text-section-' + index });
+            $(this).find('span.counter').text(index);
+        });
+
+    }
+});
+
+$(document).on("click", ".remove-text", function () {
+    var element = '';
+    var data_id = $(this).parents('.card-box').attr('data-id');
+
+    $("#exampleModalCenter")
+        .find("#exampleModalLongTitle")
+        .html('<svg viewBox="-40 0 427 427.00131" xmlns="http://www.w3.org/2000/svg" class="gt gs mt--4">< path d = "m232.398438 154.703125c-5.523438 0-10 4.476563-10 10v189c0 5.519531 4.476562 10 10 10 5.523437 0 10-4.480469 10-10v-189c0-5.523437-4.476563-10-10-10zm0 0" ></path ><path d="m114.398438 154.703125c-5.523438 0-10 4.476563-10 10v189c0 5.519531 4.476562 10 10 10 5.523437 0 10-4.480469 10-10v-189c0-5.523437-4.476563-10-10-10zm0 0"></path><path d="m28.398438 127.121094v246.378906c0 14.5625 5.339843 28.238281 14.667968 38.050781 9.285156 9.839844 22.207032 15.425781 35.730469 15.449219h189.203125c13.527344-.023438 26.449219-5.609375 35.730469-15.449219 9.328125-9.8125 14.667969-23.488281 14.667969-38.050781v-246.378906c18.542968-4.921875 30.558593-22.835938 28.078124-41.863282-2.484374-19.023437-18.691406-33.253906-37.878906-33.257812h-51.199218v-12.5c.058593-10.511719-4.097657-20.605469-11.539063-28.03125-7.441406-7.421875-17.550781-11.5546875-28.0625-11.46875h-88.796875c-10.511719-.0859375-20.621094 4.046875-28.0625 11.46875-7.441406 7.425781-11.597656 17.519531-11.539062 28.03125v12.5h-51.199219c-19.1875.003906-35.394531 14.234375-37.878907 33.257812-2.480468 19.027344 9.535157 36.941407 28.078126 41.863282zm239.601562 279.878906h-189.203125c-17.097656 0-30.398437-14.6875-30.398437-33.5v-245.5h250v245.5c0 18.8125-13.300782 33.5-30.398438 33.5zm-158.601562-367.5c-.066407-5.207031 1.980468-10.21875 5.675781-13.894531 3.691406-3.675781 8.714843-5.695313 13.925781-5.605469h88.796875c5.210937-.089844 10.234375 1.929688 13.925781 5.605469 3.695313 3.671875 5.742188 8.6875 5.675782 13.894531v12.5h-128zm-71.199219 32.5h270.398437c9.941406 0 18 8.058594 18 18s-8.058594 18-18 18h-270.398437c-9.941407 0-18-8.058594-18-18s8.058593-18 18-18zm0 0"></path><path d="m173.398438 154.703125c-5.523438 0-10 4.476563-10 10v189c0 5.519531 4.476562 10 10 10 5.523437 0 10-4.480469 10-10v-189c0-5.523437-4.476563-10-10-10zm0 0"></path></svg > Delete?');
+    $("#exampleModalCenter")
+        .find(".modal-body")
+        .html("Are you sure you want to delete?");
+    $("#exampleModalCenter")
+        .find(".modal-footer")
+        .html(
+            '<button type="button" class="btn btn-outline-secondary btn-sm" data-dismiss="modal">Close</button><button data-id="' + data_id + '" type="button" class="btn btn-primary" id="confirm-delete-text">Ok</button>'
+        );
+    $("#exampleModalCenter").modal("show");
+
+    element = $(this);
+
+});
+
+$(document).on("click", "#confirm-delete-text", function () {
+    var eve = $(this).attr('data-id');
+
+    $('div.card-box[data-id="' + eve + '"]').remove();
+    $("form.sec1 div.section-2:visible div#root .card-box").each(function (index, obj) {
+        $(this).find('span.counter').text(index);
+    });
+
+    $("#exampleModalCenter").modal("hide");
+
+});
+
 
 $(document).on("click", "#next", function () {
     /* Validate */
@@ -192,9 +441,7 @@ $(document).on("click", "#next", function () {
             var element = $(this);
             if (element.val() == "") {
                 validate = false;
-                if (element.attr("id") == "quiz-title") {
-                    error_text += "<p>Quiz title is required.</p>";
-                } else if (element.attr("id").startsWith("question-title")) {
+                if (element.attr("id").startsWith("question-title")) {
                     console.log("question_number.length" + question_number.length);
                     if (
                         question_number !=
@@ -248,6 +495,7 @@ $(document).on("click", "#next", function () {
                 '<button type="button" class="btn btn-outline-secondary btn-sm" data-dismiss="modal">Close</button>'
             );
         $("#exampleModalCenter").find("#save-changes").hide();
+
         $("#exampleModalCenter").modal("show");
     }
 });
@@ -537,14 +785,13 @@ async function getTheme(request) {
 
 
     $('form.sec1').append(form_section);
-    $('form.sec1').after(modal_section);
-    $('form.sec1').after(setting_section);
-    $('form.sec1').after(option_section);
-    $('form.sec1').after(questions_section);
+    $('form.sec1').append(setting_section);
     $('form.sec1').append(training_section_view);
+    $('form.sec1').after(option_section);
+    $('form.sec1').after(modal_section);
 
 
-    question_section = $("#question-section div.container").clone();
+    // question_section = $("#question-section div.container").clone();
     opt = $("div#option-section .option-div").clone();
 
     var week_date = new Date(new Date().setDate(new Date().getDate() + 7))
@@ -555,8 +802,6 @@ async function getTheme(request) {
         .toISOString()
         .split("T")[0];
     $("#expiry-date").val(week_date).attr({ min: today });
-    $("form").append($("#setting").clone());
-    // $("#add-questions").click();
 
     await actionSDK.executeApi(new actionSDK.HideLoadingIndicator.Request());
 
@@ -675,8 +920,10 @@ $(document).on('click', '#next1', function () {
                 }
             } else {
                 $('.section-1').hide();
+                $('div.section-1-footer').hide();
+
                 $('.section-2').show();
-                $("#hide1").hide();
+                $('div.section-2-footer').show();
 
                 $('#training-title-content').text($('#training-title').val());
                 $('#training-description-content').text($('#training-description').val());
@@ -702,20 +949,6 @@ var form_section = `<div class="section-1" style="display:none">
                     </div>
                 </div>
             </div>
-
-            <!-- <div class="container pb-5">
-                <div class="form-group pb-5">
-                    <button type="button" class="btn btn-primary btn-sm" id="add-questions"> <svg role="presentation"
-                            focusable="false" viewBox="8 8 16 16" class="cc gs gt wh gv">
-                            <path class="ui-icon__outline cc"
-                                d="M23.352 16.117c.098.1.148.217.148.352 0 .136-.05.253-.148.351a.48.48 0 0 1-.352.149h-6v6c0 .136-.05.253-.148.351a.48.48 0 0 1-.352.149.477.477 0 0 1-.352-.149.477.477 0 0 1-.148-.351v-6h-6a.477.477 0 0 1-.352-.149.48.48 0 0 1-.148-.351c0-.135.05-.252.148-.352A.481.481 0 0 1 10 15.97h6v-6c0-.135.049-.253.148-.352a.48.48 0 0 1 .352-.148c.135 0 .252.05.352.148.098.1.148.216.148.352v6h6c.135 0 .252.05.352.148z">
-                            </path>
-                            <path class="ui-icon__filled gr"
-                                d="M23.5 15.969a1.01 1.01 0 0 1-.613.922.971.971 0 0 1-.387.078H17v5.5a1.01 1.01 0 0 1-.613.922.971.971 0 0 1-.387.078.965.965 0 0 1-.387-.079.983.983 0 0 1-.535-.535.97.97 0 0 1-.078-.386v-5.5H9.5a.965.965 0 0 1-.387-.078.983.983 0 0 1-.535-.535.972.972 0 0 1-.078-.387 1.002 1.002 0 0 1 1-1H15v-5.5a1.002 1.002 0 0 1 1.387-.922c.122.052.228.124.32.215a.986.986 0 0 1 .293.707v5.5h5.5a.989.989 0 0 1 .707.293c.09.091.162.198.215.32a.984.984 0 0 1 .078.387z">
-                            </path>
-                        </svg> Add Questions</button>
-                </div>
-            </div> -->
         </div>
 
         <div class="footer section-1-footer"  style="display:none">
@@ -787,7 +1020,7 @@ var form_section = `<div class="section-1" style="display:none">
 var training_section_view = `<div class="section-2" style="display:none">
             <div class="container pt-4">
                 <div id="root" class="">
-                    <div class="card-box card-bg crad-border">
+                    <div class="card-box card-bg card-border">
                         <h4 id="training-title-content"></h4>
                         <p class="mb0" id="training-description-content"></p>
                     </div>
@@ -824,7 +1057,7 @@ var training_section_view = `<div class="section-2" style="display:none">
         </div>`;
 
 // Question
-var questions_section = `<div style="display: none;" id="question-section">
+var questions_section = `<div class="question-section pt-4">
         <div class="container question-container">
             <div class="card-box card-border card-bg">
                 <div class="form-group">
@@ -929,6 +1162,45 @@ var questions_section = `<div style="display: none;" id="question-section">
         </div>
     </div>`;
 
+// Add Question Button
+var add_question_button = `<div class="container pb-5 question_button">
+                <div class="form-group pb-5">
+                    <button type="button" class="btn btn-primary btn-sm" id="add-questions-same-section"> <svg role="presentation"
+                            focusable="false" viewBox="8 8 16 16" class="cc gs gt wh gv">
+                            <path class="ui-icon__outline cc"
+                                d="M23.352 16.117c.098.1.148.217.148.352 0 .136-.05.253-.148.351a.48.48 0 0 1-.352.149h-6v6c0 .136-.05.253-.148.351a.48.48 0 0 1-.352.149.477.477 0 0 1-.352-.149.477.477 0 0 1-.148-.351v-6h-6a.477.477 0 0 1-.352-.149.48.48 0 0 1-.148-.351c0-.135.05-.252.148-.352A.481.481 0 0 1 10 15.97h6v-6c0-.135.049-.253.148-.352a.48.48 0 0 1 .352-.148c.135 0 .252.05.352.148.098.1.148.216.148.352v6h6c.135 0 .252.05.352.148z">
+                            </path>
+                            <path class="ui-icon__filled gr"
+                                d="M23.5 15.969a1.01 1.01 0 0 1-.613.922.971.971 0 0 1-.387.078H17v5.5a1.01 1.01 0 0 1-.613.922.971.971 0 0 1-.387.078.965.965 0 0 1-.387-.079.983.983 0 0 1-.535-.535.97.97 0 0 1-.078-.386v-5.5H9.5a.965.965 0 0 1-.387-.078.983.983 0 0 1-.535-.535.972.972 0 0 1-.078-.387 1.002 1.002 0 0 1 1-1H15v-5.5a1.002 1.002 0 0 1 1.387-.922c.122.052.228.124.32.215a.986.986 0 0 1 .293.707v5.5h5.5a.989.989 0 0 1 .707.293c.09.091.162.198.215.32a.984.984 0 0 1 .078.387z">
+                            </path>
+                        </svg> Add Questions</button>
+                </div>
+            </div>`;
+
+// Question Footer
+var question_footer = `<div class="footer question-footer" >
+            <div class="footer-padd bt">
+                <div class="container ">
+                    <div class="row">
+                        <div class="col-9">
+                            <a class=" cursur-pointer" id="back-question">
+                                <svg role="presentation" focusable="false" viewBox="8 8 16 16" class="gt ki gs">
+                                    <path class="ui-icon__outline gr"
+                                        d="M16.38 20.85l7-7a.485.485 0 0 0 0-.7.485.485 0 0 0-.7 0l-6.65 6.64-6.65-6.64a.485.485 0 0 0-.7 0 .485.485 0 0 0 0 .7l7 7c.1.1.21.15.35.15.14 0 .25-.05.35-.15z">
+                                    </path>
+                                    <path class="ui-icon__filled"
+                                        d="M16.74 21.21l7-7c.19-.19.29-.43.29-.71 0-.14-.03-.26-.08-.38-.06-.12-.13-.23-.22-.32s-.2-.17-.32-.22a.995.995 0 0 0-.38-.08c-.13 0-.26.02-.39.07a.85.85 0 0 0-.32.21l-6.29 6.3-6.29-6.3a.988.988 0 0 0-.32-.21 1.036 1.036 0 0 0-.77.01c-.12.06-.23.13-.32.22s-.17.2-.22.32c-.05.12-.08.24-.08.38 0 .28.1.52.29.71l7 7c.19.19.43.29.71.29.28 0 .52-.1.71-.29z">
+                                    </path>
+                                </svg> Back
+                            </a>
+                        </div>
+                        <div class="col-3 text-right"> <button type="button" class="btn btn-primary btn-sm pull-right"
+                                id="question-done"> Done</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>`;;
+
 // Option
 var option_section = `<div style="display: none;" id="option-section">
         <div class="option-div">
@@ -959,8 +1231,43 @@ var option_section = `<div style="display: none;" id="option-section">
         </div>
     </div>`;
 
+var add_text_section = `<div class="text-section" >
+            <div class="container pt-4">
+                <div id="root" class="">
+                    <div class="card-box card-bg card-border">
+                        <div class="form-group">
+                        <textarea class="in-t form-control" id="training-text" placeholder="Text"></textarea>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+var add_text_footer = `<div class="footer text-footer" >
+            <div class="footer-padd bt">
+                <div class="container ">
+                    <div class="row">
+                        <div class="col-9">
+                            <a class=" cursur-pointer" id="back-text">
+                                <svg role="presentation" focusable="false" viewBox="8 8 16 16" class="gt ki gs">
+                                    <path class="ui-icon__outline gr"
+                                        d="M16.38 20.85l7-7a.485.485 0 0 0 0-.7.485.485 0 0 0-.7 0l-6.65 6.64-6.65-6.64a.485.485 0 0 0-.7 0 .485.485 0 0 0 0 .7l7 7c.1.1.21.15.35.15.14 0 .25-.05.35-.15z">
+                                    </path>
+                                    <path class="ui-icon__filled"
+                                        d="M16.74 21.21l7-7c.19-.19.29-.43.29-.71 0-.14-.03-.26-.08-.38-.06-.12-.13-.23-.22-.32s-.2-.17-.32-.22a.995.995 0 0 0-.38-.08c-.13 0-.26.02-.39.07a.85.85 0 0 0-.32.21l-6.29 6.3-6.29-6.3a.988.988 0 0 0-.32-.21 1.036 1.036 0 0 0-.77.01c-.12.06-.23.13-.32.22s-.17.2-.22.32c-.05.12-.08.24-.08.38 0 .28.1.52.29.71l7 7c.19.19.43.29.71.29.28 0 .52-.1.71-.29z">
+                                    </path>
+                                </svg> Back
+                            </a>
+                        </div>
+                        <div class="col-3 text-right"> <button type="button" class="btn btn-primary btn-sm pull-right"
+                                id="text-done"> Done</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>`;;
+
 // Setting 
-var setting_section = `<div class="hide" id="setting">
+var setting_section = `<div class="" style="display: none;" id="setting">
         <div class="container pt-4 setting-section">
             <div class="row">
                 <div class="col-sm-12">
@@ -1009,7 +1316,7 @@ var setting_section = `<div class="hide" id="setting">
                 <div class="col-11">
                     <div class="row">
                         <div class="col-12">
-                            <div class="input-group mb-2 form-check custom-check-outer">
+                            <div class="custom-check-outer">
                                 <label class="custom-check form-check-label">
                                     <input type="checkbox" name="show_correct_answer" id="show-correct-answer"
                                         value="Yes" />
@@ -1038,7 +1345,7 @@ var setting_section = `<div class="hide" id="setting">
                                 </a>
                             </div>
                             <div class="col-3">
-                                <button class="btn btn-tpt">&nbsp;</button>
+                                <button type="button" class="btn btn-tpt">&nbsp;</button>
                             </div>
                         </div>
                     </div>
