@@ -263,18 +263,18 @@ $(document).on("click", "#question-done", function() {
             }
         });
 
-    var questionCount = $("form").find("div.container.question-container").length;
+    var questionCount = $("form div.question-section").find("div.container.question-container").length;
     questions = new Array();
     var error = false;
     for (var i = 1; i <= questionCount; i++) {
         var is_selected = 0;
 
-        $("#question" + i)
+        $(".question-section > #question" + i)
             .find("div.option-div")
             .each(function(index, elem) {
                 var count = index + 1;
                 if (
-                    $("#question" + i)
+                    $(".question-section > #question" + i)
                     .find("#check" + count)
                     .is(":checked")
                 ) {
@@ -319,7 +319,7 @@ $(document).on("click", "#question-done", function() {
                 .find("div.option-div")
                 .each(function(index, elem) {
                     var counter = $("form.sec1 div.section-2:visible div#root .card-box").length;
-                    var question_inputs = $("#question" + i).html();
+                    var question_inputs = $("#question" + i).find('div.card-box').clone();
                     var question_text = $("#question" + i).find('#question-title').val();
 
                     var options_counter = numbertowords($('#question' + i).find('input[id^="option"]').length);
@@ -346,9 +346,10 @@ $(document).on("click", "#question-done", function() {
                             <label><strong class="question">${question_text}</strong></label>
                             <p class="mb0">Correct Answer: <span class="correct-answer">abc, bca</span></p>
                         </div>
-                        <div class="question-inputs" style="display:none">
-                        ${question_inputs}
+                        <div class="question-inputs" id="quest-text-${counter}" style="display:none">
+                        
                         </div>`);
+                    $('#quest-text-' + counter).html(question_inputs);
 
                     $("form.sec1 div.section-2:visible div#root .card-box").each(function(index, obj) {
                         $(this).attr({ 'data-id': 'text-section-' + index });
