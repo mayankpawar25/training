@@ -10,8 +10,8 @@ let setting_text = ' Due in 1 week, Results visible to everyone';
 let question_section = '';
 let opt = '';
 
-/* Add Questions */
-$(document).on("click", "#add-questions", function() {
+/***********************************  Add Questions *********************************/
+$(document).on("click", "#add-questions", function () {
 
     $('.section-2').hide();
     $('.section-2-footer').hide();
@@ -27,7 +27,7 @@ $(document).on("click", "#add-questions", function() {
     $('form.sec1').append(question_footer);
 
     var question_counter = 0;
-    $("div.question-container:visible").each(function(index, elem) {
+    $("div.question-container:visible").each(function (index, elem) {
         question_counter = index + 1;
         $(elem)
             .find("span.question-number")
@@ -37,12 +37,12 @@ $(document).on("click", "#add-questions", function() {
 
 });
 
-$(document).on("click", "#add-questions-same-section", function() {
+$(document).on("click", "#add-questions-same-section", function () {
     var question_counter;
     $('form.sec1').append(questions_section);
     $('form > .question_button').remove();
 
-    $("div.question-container:visible").each(function(index, elem) {
+    $("div.question-container:visible").each(function (index, elem) {
         question_counter = index + 1;
         $(elem)
             .find("span.question-number")
@@ -54,7 +54,7 @@ $(document).on("click", "#add-questions-same-section", function() {
     $('form.sec1').append(add_question_button);
 });
 
-$(document).on("click", "#back-question", function() {
+$(document).on("click", "#back-question", function () {
     $(".question-section").hide();
     $(".add_question_button").hide();
     $(".question-footer").hide();
@@ -65,7 +65,7 @@ $(document).on("click", "#back-question", function() {
 });
 
 /* Remove Questions */
-$(document).on("click", ".remove-question", function() {
+$(document).on("click", ".remove-question", function () {
     var element = $(this);
     var data_id = $(this).parents('.question-container').attr('id');
 
@@ -99,12 +99,12 @@ $(document).on("click", ".remove-question", function() {
     }
 });
 
-$(document).on("click", "#delete-question", function() {
+$(document).on("click", "#delete-question", function () {
     var element = $(this).attr('data-id');
     $("#exampleModalCenter").modal("hide");
     $('#' + element).parents('div.question-section.pt-4').remove();
     var question_counter;
-    $("div.question-container:visible").each(function(index, elem) {
+    $("div.question-container:visible").each(function (index, elem) {
         question_counter = index + 1;
         $(elem).find("span.question-number").text(question_counter);
         $(elem).attr({ id: "question" + question_counter });
@@ -112,11 +112,11 @@ $(document).on("click", "#delete-question", function() {
 });
 
 /* Add Options */
-$(document).on("click", ".add-options", function() {
+$(document).on("click", ".add-options", function () {
     if (
         $(this)
-        .parents("div.container")
-        .find("div.option-div > div.input-group > input[type='text']").length >=
+            .parents("div.container")
+            .find("div.option-div > div.input-group > input[type='text']").length >=
         10
     ) {
         $("#exampleModalCenter")
@@ -154,7 +154,7 @@ $(document).on("click", ".add-options", function() {
     var selector = $(this).parents("div.container");
     $(selector)
         .find('div.option-div > div.input-group > input[type="text"]')
-        .each(function(index, elem) {
+        .each(function (index, elem) {
             var counter = index + 1;
             $(elem).attr({
                 placeholder: "Option " + counter,
@@ -168,7 +168,7 @@ $(document).on("click", ".add-options", function() {
 });
 
 /* Remove Options */
-$(document).on("click", ".remove-option", function(eve) {
+$(document).on("click", ".remove-option", function (eve) {
     if (
         $(this).parents("div.question-container").find("div.option-div").length > 2
     ) {
@@ -176,7 +176,7 @@ $(document).on("click", ".remove-option", function(eve) {
         $(this).parents("div.option-div").remove();
         $(selector)
             .find('div.option-div > div.input-group > input[type="text"]')
-            .each(function(index, elem) {
+            .each(function (index, elem) {
                 var counter = index + 1;
                 $(elem).attr({
                     placeholder: "Option " + counter,
@@ -217,19 +217,21 @@ $(document).on("click", ".remove-option", function(eve) {
     }
 });
 
-$(document).on("click", "#question-done", function() {
+$(document).on("click", "#question-done", function () {
     $('#question-done').prop('disabled', true);
 
     /* Validate */
     var error_text = "";
     var question_number = 0;
+    var error = false;
+    validate = true;
     $("input[type='text']").removeClass("danger");
     $("label.label-alert").remove();
     $("div.card-box-alert").removeClass("card-box-alert").addClass("card-box");
 
     $("form")
         .find("input[type='text']")
-        .each(function() {
+        .each(function () {
             var element = $(this);
             if (element.val() == "") {
                 validate = false;
@@ -265,18 +267,18 @@ $(document).on("click", "#question-done", function() {
 
     var questionCount = $("form div.question-section").find("div.container.question-container").length;
     questions = new Array();
-    var error = false;
+
     for (var i = 1; i <= questionCount; i++) {
         var is_selected = 0;
 
         $(".question-section > #question" + i)
             .find("div.option-div")
-            .each(function(index, elem) {
+            .each(function (index, elem) {
                 var count = index + 1;
                 if (
                     $(".question-section > #question" + i)
-                    .find("#check" + count)
-                    .is(":checked")
+                        .find("#check" + count)
+                        .is(":checked")
                 ) {
                     // if it is checked
                     is_selected++;
@@ -314,48 +316,72 @@ $(document).on("click", "#question-done", function() {
         $('.section-2-footer').show();
 
         /* Create Question Section Here */
-        for (var i = 1; i <= questionCount; i++) {
-            $("#question" + i)
+        for (var j = 1; j <= questionCount; j++) {
+
+            var text_number = $("form.sec1 div.section-2:visible div#root div.training-card-section").length;
+            console.log(`text_number: ${text_number}`);
+
+            /*  Get selected Answer */
+            var correct = [];
+
+            /* Looping for options */
+            $("#question" + j)
                 .find("div.option-div")
-                .each(function(index, elem) {
-                    var counter = $("form.sec1 div.section-2:visible div#root .card-box").length;
-                    var question_inputs = $("#question" + i).find('div.card-box').clone();
-                    var question_text = $("#question" + i).find('#question-title').val();
+                .each(function (index, elem) {
+                    var count = index + 1;
 
-                    var options_counter = numbertowords($('#question' + i).find('input[id^="option"]').length);
+                    if (
+                        $("#question" + j)
+                            .find("#check" + count)
+                            .is(":checked")
+                    ) {
+                        var opt_data = $(elem).find('input[id^="option"]').val();;
 
-                    $("form.sec1 div.section-2:visible div#root .card-box:last").after(`<div class="card-box card-bg card-border">
-                            <div class="form-group">
-                                <div class="hover-btn h-32">
-                                    <label><strong><span class="counter">${counter}</span>. Question with <span class="option-counter"> ${options_counter} </span> option </strong> </label>
-                                    <button type="button" class="close remove-text" data-dismiss="alert">
-                                        <span aria-hidden="true">
-                                            <svg viewBox="-40 0 427 427.00131" xmlns="http://www.w3.org/2000/svg" class="gt gs">
-                                                <path d="m232.398438 154.703125c-5.523438 0-10 4.476563-10 10v189c0 5.519531 4.476562 10 10 10 5.523437 0 10-4.480469 10-10v-189c0-5.523437-4.476563-10-10-10zm0 0"></path>
-                                                <path d="m114.398438 154.703125c-5.523438 0-10 4.476563-10 10v189c0 5.519531 4.476562 10 10 10 5.523437 0 10-4.480469 10-10v-189c0-5.523437-4.476563-10-10-10zm0 0"></path>
-                                                <path d="m28.398438 127.121094v246.378906c0 14.5625 5.339843 28.238281 14.667968 38.050781 9.285156 9.839844 22.207032 15.425781 35.730469 15.449219h189.203125c13.527344-.023438 26.449219-5.609375 35.730469-15.449219 9.328125-9.8125 14.667969-23.488281 14.667969-38.050781v-246.378906c18.542968-4.921875 30.558593-22.835938 28.078124-41.863282-2.484374-19.023437-18.691406-33.253906-37.878906-33.257812h-51.199218v-12.5c.058593-10.511719-4.097657-20.605469-11.539063-28.03125-7.441406-7.421875-17.550781-11.5546875-28.0625-11.46875h-88.796875c-10.511719-.0859375-20.621094 4.046875-28.0625 11.46875-7.441406 7.425781-11.597656 17.519531-11.539062 28.03125v12.5h-51.199219c-19.1875.003906-35.394531 14.234375-37.878907 33.257812-2.480468 19.027344 9.535157 36.941407 28.078126 41.863282zm239.601562 279.878906h-189.203125c-17.097656 0-30.398437-14.6875-30.398437-33.5v-245.5h250v245.5c0 18.8125-13.300782 33.5-30.398438 33.5zm-158.601562-367.5c-.066407-5.207031 1.980468-10.21875 5.675781-13.894531 3.691406-3.675781 8.714843-5.695313 13.925781-5.605469h88.796875c5.210937-.089844 10.234375 1.929688 13.925781 5.605469 3.695313 3.671875 5.742188 8.6875 5.675782 13.894531v12.5h-128zm-71.199219 32.5h270.398437c9.941406 0 18 8.058594 18 18s-8.058594 18-18 18h-270.398437c-9.941407 0-18-8.058594-18-18s8.058593-18 18-18zm0 0"></path>
-                                                <path d="m173.398438 154.703125c-5.523438 0-10 4.476563-10 10v189c0 5.519531 4.476562 10 10 10 5.523437 0 10-4.480469 10-10v-189c0-5.523437-4.476563-10-10-10zm0 0"></path>
-                                            </svg>
-                                        </span>
-                                        <span class="sr-only">Close</span>
-                                    </button>
-                                </div>
-                                <div class="clearfix"></div>
-                                <hr>
-                            </div>
-                            <label><strong class="question">${question_text}</strong></label>
-                            <p class="mb0">Correct Answer: <span class="correct-answer">abc, bca</span></p>
-                        </div>
-                        <div class="question-inputs" id="quest-text-${counter}" style="display:none">
-                        
-                        </div>`);
-                    $('#quest-text-' + counter).html(question_inputs);
-
-                    $("form.sec1 div.section-2:visible div#root .card-box").each(function(index, obj) {
-                        $(this).attr({ 'data-id': 'text-section-' + index });
-                        $(this).find('span.counter').text(index);
-                    });
+                        // if it is checked
+                        correct.push(opt_data);
+                    }
                 });
+
+
+
+
+            var question_inputs = $("#question" + j).find('div.card-box').clone();
+            var question_text = $("#question" + j).find('#question-title').val();
+            var correct_answer = correct.join(', ');
+
+            var options_counter = numbertowords($('#question' + j).find('input[id^="option"]').length);
+
+            $("form.sec1 div.section-2:visible div#root .card-box.training-card-section:last").after(`<div class="card-box card-bg card-border training-card-section section-div question-section-div">
+                <div class="form-group">
+                    <div class="hover-btn h-32">
+                        <label><strong><span class="counter">${text_number}</span>. Question with <span class="option-counter"> ${options_counter} </span> option </strong> </label>
+                        <button type="button" class="close remove-text" data-dismiss="alert">
+                            <span aria-hidden="true">
+                                <svg viewBox="-40 0 427 427.00131" xmlns="http://www.w3.org/2000/svg" class="gt gs">
+                                    <path d="m232.398438 154.703125c-5.523438 0-10 4.476563-10 10v189c0 5.519531 4.476562 10 10 10 5.523437 0 10-4.480469 10-10v-189c0-5.523437-4.476563-10-10-10zm0 0"></path>
+                                    <path d="m114.398438 154.703125c-5.523438 0-10 4.476563-10 10v189c0 5.519531 4.476562 10 10 10 5.523437 0 10-4.480469 10-10v-189c0-5.523437-4.476563-10-10-10zm0 0"></path>
+                                    <path d="m28.398438 127.121094v246.378906c0 14.5625 5.339843 28.238281 14.667968 38.050781 9.285156 9.839844 22.207032 15.425781 35.730469 15.449219h189.203125c13.527344-.023438 26.449219-5.609375 35.730469-15.449219 9.328125-9.8125 14.667969-23.488281 14.667969-38.050781v-246.378906c18.542968-4.921875 30.558593-22.835938 28.078124-41.863282-2.484374-19.023437-18.691406-33.253906-37.878906-33.257812h-51.199218v-12.5c.058593-10.511719-4.097657-20.605469-11.539063-28.03125-7.441406-7.421875-17.550781-11.5546875-28.0625-11.46875h-88.796875c-10.511719-.0859375-20.621094 4.046875-28.0625 11.46875-7.441406 7.425781-11.597656 17.519531-11.539062 28.03125v12.5h-51.199219c-19.1875.003906-35.394531 14.234375-37.878907 33.257812-2.480468 19.027344 9.535157 36.941407 28.078126 41.863282zm239.601562 279.878906h-189.203125c-17.097656 0-30.398437-14.6875-30.398437-33.5v-245.5h250v245.5c0 18.8125-13.300782 33.5-30.398438 33.5zm-158.601562-367.5c-.066407-5.207031 1.980468-10.21875 5.675781-13.894531 3.691406-3.675781 8.714843-5.695313 13.925781-5.605469h88.796875c5.210937-.089844 10.234375 1.929688 13.925781 5.605469 3.695313 3.671875 5.742188 8.6875 5.675782 13.894531v12.5h-128zm-71.199219 32.5h270.398437c9.941406 0 18 8.058594 18 18s-8.058594 18-18 18h-270.398437c-9.941407 0-18-8.058594-18-18s8.058593-18 18-18zm0 0"></path>
+                                    <path d="m173.398438 154.703125c-5.523438 0-10 4.476563-10 10v189c0 5.519531 4.476562 10 10 10 5.523437 0 10-4.480469 10-10v-189c0-5.523437-4.476563-10-10-10zm0 0"></path>
+                                </svg>
+                            </span>
+                            <span class="sr-only">Close</span>
+                        </button>
+                    </div>
+                    <div class="clearfix"></div>
+                    <hr>
+                </div>
+                <label><strong class="question">${question_text}</strong></label>
+                <p class="mb0">Correct Answer: <span class="correct-answer">${correct_answer}</span></p>
+                <div class="question-inputs" id="quest-text-${text_number}" style="display:none">
+                
+                </div>
+            </div>`);
+            $('#quest-text-' + text_number).html(question_inputs);
+
+            $("form.sec1 div.section-2:visible div#root .card-box").each(function (index, obj) {
+                $(this).attr({ 'data-id': 'text-section-' + index });
+                $(this).find('span.counter').text(index);
+            });
         }
     }
 
@@ -364,9 +390,9 @@ $(document).on("click", "#question-done", function() {
 });
 
 
-
+/***********************************  Add Text *********************************/
 /* Add Text */
-$(document).on("click", "#add-text", function() {
+$(document).on("click", "#add-text", function () {
 
     $('.section-2').hide();
     $('.section-2-footer').hide();
@@ -380,13 +406,13 @@ $(document).on("click", "#add-text", function() {
     $('form.sec1').append(add_text_footer);
 });
 
-$(document).on("click", ".show-setting", function() {
+$(document).on("click", ".show-setting", function () {
     $(".section-1").hide();
     $(".section-1-footer").hide();
     $("form #setting").show();
 });
 
-$(document).on("click", "#back-text", function() {
+$(document).on("click", "#back-text", function () {
     $(".text-section").hide();
     $(".text-footer").hide();
 
@@ -394,7 +420,7 @@ $(document).on("click", "#back-text", function() {
     $(".section-2-footer").show();
 });
 
-$(document).on("click", "#text-done", function() {
+$(document).on("click", "#text-done", function () {
     var error_text = "";
     $("textarea").removeClass('danger');
     $("label.label-alert").remove();
@@ -404,19 +430,20 @@ $(document).on("click", "#text-done", function() {
         $("textarea").focus();
         $("textarea").addClass('danger');
     } else {
-        var text_data = $('textarea#training-text').val()
+        var text_data = $('textarea#training-text').val();
+        var text_number = $("form.sec1 div.section-2:visible div#root div.training-card-section").length;
+        console.log(`text_number: ${text_number}`);
+
         $('.text-section').hide();
         $('.text-footer').hide();
 
         $('.section-2').show();
         $('.section-2-footer').show();
 
-        var counter = $("form.sec1 div.section-2:visible div#root .card-box").length;
-
-        $("form.sec1 div.section-2:visible div#root .card-box:last").after(`<div class="card-box card-bg card-border">
+        $("form.sec1 div.section-2:visible div#root .card-box.training-card-section:last").after(`<div class="card-box card-bg card-border training-card-section section-div text-section-div">
                 <div class="form-group">
                     <div class="hover-btn h-32">
-                        <label><strong><span class="counter">${counter}</span>. <span class="type">Text</span></strong> </label>
+                        <label><strong><span class="counter">${text_number}</span>. <span class="type">Text</span></strong> </label>
                         <button type="button" class="close remove-text" data-dismiss="alert">
                             <span aria-hidden="true">
                                 <svg viewBox="-40 0 427 427.00131" xmlns="http://www.w3.org/2000/svg" class="gt gs">
@@ -437,7 +464,7 @@ $(document).on("click", "#text-done", function() {
             </div>`);
 
 
-        $("form.sec1 div.section-2:visible div#root .card-box").each(function(index, obj) {
+        $("form.sec1 div.section-2:visible div#root .card-box").each(function (index, obj) {
             $(this).attr({ 'data-id': 'text-section-' + index });
             $(this).find('span.counter').text(index);
         });
@@ -445,7 +472,7 @@ $(document).on("click", "#text-done", function() {
     }
 });
 
-$(document).on("click", ".remove-text", function() {
+$(document).on("click", ".remove-text", function () {
     var element = '';
     var data_id = $(this).parents('.card-box').attr('data-id');
 
@@ -466,11 +493,11 @@ $(document).on("click", ".remove-text", function() {
 
 });
 
-$(document).on("click", "#confirm-delete-text", function() {
+$(document).on("click", "#confirm-delete-text", function () {
     var eve = $(this).attr('data-id');
 
     $('div.card-box[data-id="' + eve + '"]').remove();
-    $("form.sec1 div.section-2:visible div#root .card-box").each(function(index, obj) {
+    $("form.sec1 div.section-2:visible div#root .card-box").each(function (index, obj) {
         $(this).find('span.counter').text(index);
     });
 
@@ -479,14 +506,14 @@ $(document).on("click", "#confirm-delete-text", function() {
 });
 
 
-$(document).on("click", "#next", function() {
+$(document).on("click", "#next", function () {
     /* Validate */
     var error_text = "";
     var question_number = 0;
 
     $("form")
         .find("input[type='text']")
-        .each(function() {
+        .each(function () {
             var element = $(this);
             if (element.val() == "") {
                 validate = false;
@@ -495,9 +522,9 @@ $(document).on("click", "#next", function() {
                     if (
                         question_number !=
                         element
-                        .parents("div.form-group")
-                        .find("span.question-number")
-                        .text()
+                            .parents("div.form-group")
+                            .find("span.question-number")
+                            .text()
                     ) {
                         question_number = element
                             .parents("div.form-group")
@@ -549,112 +576,41 @@ $(document).on("click", "#next", function() {
     }
 });
 
-$(document).on("click", "#submit", function() {
+
+/***********************************  Submit Training *********************************/
+$(document).on("click", "#submit", function () {
     $("#submit").prop('disabled', true);
     submitForm();
 });
 
 function submitForm() {
-    /* Validate */
-    var error_text = "";
-    var question_number = 0;
-    $("input[type='text']").removeClass("danger");
-    $("label.label-alert").remove();
-    $("div.card-box-alert").removeClass("card-box-alert").addClass("card-box");
-
-
-    $("form")
-        .find("input[type='text']")
-        .each(function() {
-            var element = $(this);
-            if (element.val() == "") {
-                validate = false;
-
-                $(this)
-                    .parents("div.card-box")
-                    .removeClass("card-box")
-                    .addClass("card-box-alert");
-
-                if (element.attr("id") == "quiz-title") {
-                    error_text += "<p>Quiz title is required.</p>";
-                    $("#quiz-title").addClass("danger");
-                    $("#quiz-title").before(
-                        '<label class="label-alert d-block"><small>Required</small></label>'
-                    );
-                } else if (element.attr("id").startsWith("question-title")) {
-                    // console.log("question_number.length" + question_number.length);
-                    $(this).addClass("danger");
-                    $(this)
-                        .parents("div.input-group")
-                        .before(
-                            '<label class="label-alert d-block"><small>Required</small></label>'
-                        );
-
-                    error_text += "<p>Question is required. </p>";
-                } else if (element.attr("id").startsWith("option")) {
-                    $(this).addClass("danger");
-                    $(this)
-                        .parents("div.input-group")
-                        .before(
-                            '<label class="label-alert d-block"><small>Required</small></label>'
-                        );
-
-                    error_text +=
-                        "<p>Blank option not allowed for " +
-                        element.attr("placeholder") +
-                        ".</p>";
-                }
-            }
-        });
-
-    if ($.trim(error_text).length <= 0) {
-        actionSDK
-            .executeApi(new actionSDK.GetContext.Request())
-            .then(function(response) {
-                console.info("GetContext - Response: " + JSON.stringify(response));
-                createAction(response.context.actionPackageId);
-            })
-            .catch(function(error) {
-                console.error("GetContext - Error: " + JSON.stringify(error));
-            });
-    } else {
-        $("#submit").prop('disabled', false);
-        return;
-    }
+    actionSDK
+        .executeApi(new actionSDK.GetContext.Request())
+        .then(function (response) {
+            console.info("GetContext - Response: " + JSON.stringify(response));
+            createAction(response.context.actionPackageId);
+        })
+        /* .catch(function (error) {
+            console.error("GetContext - Error: " + JSON.stringify(error));
+        }) */;
 }
 
 function getQuestionSet() {
-    var questionCount = $("form").find("div.container.question-container").length;
     questions = new Array();
-    var error = false;
-    for (var i = 1; i <= questionCount; i++) {
-        var option_type = actionSDK.ActionDataColumnValueType.SingleOption;
 
-        let option = [];
-        var is_selected = 0;
+    $("form div.section-2 #root").find('.section-div').each(function (index, elem) {
+        if ($(elem).hasClass("question-section-div") == true) {
+            /* Get Questions */
+            var option_type = actionSDK.ActionDataColumnValueType.SingleOption;
+            var question_id = $(elem).find('span.counter').text();
+            let option = [];
 
-        /* Looping for options */
-        $("#question" + i)
-            .find("div.option-div")
-            .each(function(index, elem) {
-                var count = index + 1;
-                var opt_id = "question" + i + "option" + count;
-                var opt_title = $("#question" + i)
-                    .find("#option" + count)
-                    .val();
+            $(elem).find("div.option-div").each(function (ind, e) {
+                var count = ind + 1;
+                var opt_id = "question" + question_id + "option" + count;
+                var opt_title = $("div.section-2 #quest-text-" + question_id).find("#option" + count).val();
 
-                if (
-                    $("#question" + i)
-                    .find("#check" + count)
-                    .is(":checked")
-                ) {
-                    // if it is checked
-                    is_selected++;
-                }
-
-                if (
-                    $("#question" + i).find("input[type=checkbox]:checked").length > 1
-                ) {
+                if ($("div.section-2 #question" + question_id).find("input[type=checkbox]:checked").length > 1) {
                     console.log("multiselect");
                     option_type = actionSDK.ActionDataColumnValueType.MultiOption;
                 } else {
@@ -664,66 +620,80 @@ function getQuestionSet() {
                 option.push({ name: opt_id, displayName: opt_title });
             });
 
-        var val = {
-            name: i.toString(),
-            displayName: $("#question" + i)
-                .find("#question-title")
-                .val(),
-            valueType: option_type,
-            allowNullValue: false,
-            options: option,
-        };
-
-        if (is_selected == 0) {
-            validate = false;
-            $("#question" + i)
-                .find("div.input-group:first")
-                .before(
-                    '<label class="label-alert d-block"><small>Please select correct choice for the question</small></label>'
-                );
-
-            $("#submit").prop('disabled', false);
+            var val = {
+                name: question_id.toString(),
+                displayName: $("div.section-2 #quest-text-" + question_id).find("#question-title").val(),
+                valueType: option_type,
+                allowNullValue: false,
+                options: option,
+            };
 
 
-            $("#question" + i)
-                .find("#question-title")
-                .addClass("danger");
+            questions.push(val);
 
-            $("#question" + i)
-                .find("div.card-box")
-                .removeClass("card-box")
-                .addClass("card-box-alert");
+        } else if ($(elem).hasClass("text-section-div") == true) {
+            /*  Get Text  */
+            var option_type = actionSDK.ActionDataColumnValueType.SingleOption;
+            let option = [];
+            var opt_id = $(elem).find('span.counter').text();
+            var opt_title = $(elem).find('textarea').val();
+            option.push({ name: opt_id, displayName: opt_title });
 
-            // console.log("Alert validate: " + validate);
-            // alert("Please select correct answer for Question" + i);
+            var val = {
+                name: opt_id.toString(),
+                displayName: opt_title,
+                valueType: option_type,
+                allowNullValue: false,
+                options: option,
+            };
 
-            error = true;
+            questions.push(val);
         }
-        questions.push(val);
-    }
-
-    if (error == false) {
-        return questions;
-    }
+    });
+    return questions;
 }
 
 function getCorrectAnswer() {
-    var questionCount = $("form").find("div.container.question-container").length;
     let correct_option = [];
 
+    $("form div.section-2 #root").find('.section-div').each(function (index, elem) {
+        var correct = [];
+        var question_id = $(elem).find('span.counter').text();
+        $(elem).find("div.option-div").each(function (ind, e) {
+            var count = ind + 1;
+            if ($(elem).hasClass("question-section-div") == true) {
+                var opt_id = "question" + question_id + "option" + count;
+            } else if ($(elem).hasClass("text-section-div") == true) {
+                var opt_id = "question" + question_id + "option";
+            }
+            // if it is checked
+            correct.push(opt_id);
+        });
+        correct_option[question_id] = correct;
+    });
+
+    var property = {
+        name: "Question Answers",
+        type: "LargeText",
+        value: JSON.stringify(correct_option),
+    };
+
+    return property;
+
     for (var i = 1; i <= questionCount; i++) {
+
         var correct = [];
 
         /* Looping for options */
-        $("#question" + i)
+        $("div.section-2  #question" + i)
             .find("div.option-div")
-            .each(function(index, elem) {
+            .each(function (index, elem) {
                 var count = index + 1;
 
                 if (
-                    $("#question" + i)
-                    .find("#check" + count)
-                    .is(":checked")
+                    $("div.section-2  #question" + i)
+                        .find("#check" + count)
+                        .is(":checked")
                 ) {
                     var opt_id = "question" + i + "option" + count;
 
@@ -743,10 +713,11 @@ function getCorrectAnswer() {
 }
 
 function createAction(actionPackageId) {
-    var quizTitle = $("#quiz-title").val();
-    var quizDescription = $("#quiz-description").val();
-    var quizExpireDate = $("#expiry-date").val();
-    var quizExpireTime = $("#expiry-time").val();
+    var trainingTitle = $("#training-title").val();
+    var trainingDescription = $("#training-description").val();
+    console.log(`trainingTitle: ${trainingTitle} : trainingDescription: ${trainingDescription}`);
+    var trainingExpireDate = $("#expiry-date").val();
+    var trainingExpireTime = $("#expiry-time").val();
     var resultVisible = $("input[name='visible_to']:checked").val();
     var showCorrectAnswer = $("#show-correct-answer").is(":checked") ?
         "Yes" :
@@ -760,13 +731,13 @@ function createAction(actionPackageId) {
 
     var properties = [];
     properties.push({
-        name: "Quiz Description",
+        name: "Training Description",
         type: "LargeText",
-        value: quizDescription,
+        value: trainingDescription,
     }, {
-        name: "Quiz Expire Date Time",
+        name: "Training Expire Date Time",
         type: "DateTime",
-        value: new Date(quizExpireDate + " " + quizExpireTime),
+        value: new Date(trainingExpireDate + " " + trainingExpireTime),
     }, {
         name: "Result Visible",
         type: "Text",
@@ -783,9 +754,9 @@ function createAction(actionPackageId) {
         id: generateGUID(),
         actionPackageId: actionPackageId,
         version: 1,
-        displayName: quizTitle,
-        description: quizDescription,
-        expiryTime: new Date(quizExpireDate + " " + quizExpireTime).getTime(),
+        displayName: trainingTitle,
+        description: trainingDescription,
+        expiryTime: new Date(trainingExpireDate + " " + trainingExpireTime).getTime(),
         customProperties: properties,
         dataTables: [{
             name: "TestDataSet",
@@ -795,7 +766,7 @@ function createAction(actionPackageId) {
             itemsEditable: false,
             canUserAddMultipleItems: false,
             dataColumns: questionsSet,
-        }, ],
+        },],
     };
     console.log("action: ");
     console.log(JSON.stringify(action));
@@ -803,23 +774,23 @@ function createAction(actionPackageId) {
     var request = new actionSDK.CreateAction.Request(action);
     actionSDK
         .executeApi(request)
-        .then(function(response) {
+        .then(function (response) {
             console.info("CreateAction - Response: " + JSON.stringify(response));
         })
-        .catch(function(error) {
+        .catch(function (error) {
             console.error("CreateAction - Error: " + JSON.stringify(error));
         });
 }
 
 function generateGUID() {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
         var r = (Math.random() * 16) | 0,
             v = c == "x" ? r : (r & 0x3) | 0x8;
         return v.toString(16);
     });
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
     let request = new actionSDK.GetContext.Request();
     getTheme(request);
 });
@@ -860,7 +831,7 @@ async function getTheme(request) {
     }, 1000);
 }
 
-$(document).on("click", "#back", function() {
+$(document).on("click", "#back", function () {
     $(".section-2").hide();
     $(".section-2-footer").hide();
 
@@ -868,7 +839,7 @@ $(document).on("click", "#back", function() {
     $(".section-1-footer").show();
 });
 
-$(document).on("click", "#back-setting", function() {
+$(document).on("click", "#back-setting", function () {
     $(".section-1").show();
     $(".section-1-footer").show();
 
@@ -877,7 +848,7 @@ $(document).on("click", "#back-setting", function() {
     $('#due').text(setting_text);
 });
 
-$(document).on("change", "#expiry-date, #expiry-time, .visible-to", function() {
+$(document).on("change", "#expiry-date, #expiry-time, .visible-to", function () {
     var end = new Date($('input[name="expiry_date"]').val() + ' ' + $('input[name="expiry_time"]').val());
     var start = new Date();
     var days = calc_date_diff(start, end);
@@ -941,14 +912,14 @@ function calc_date_diff(start, end) {
     }
 }
 
-$(document).on('click', '#next1', function() {
+$(document).on('click', '#next1', function () {
     $("input[type='text']").removeClass("danger");
     $("label.label-alert").remove();
     $("div.card-box-alert").removeClass("card-box-alert").addClass("card-box");
 
     $("form > .section-1")
         .find("input[type='text']")
-        .each(function() {
+        .each(function () {
             var element = $(this);
             if (element.val() == "") {
                 validate = false;
@@ -1104,13 +1075,13 @@ var form_section = `<div class="section-1" style="display:none">
 var training_section_view = `<div class="section-2" style="display:none">
             <div class="container pt-4">
                 <div id="root" class="">
-                    <div class="card-box card-bg card-border">
+                    <div class="card-box card-bg card-border training-card-section">
                         <h4 id="training-title-content"></h4>
                         <p class="mb0" id="training-description-content"></p>
                     </div>
                 </div>
             </div>
-            <div class="container">
+            <div class="container pb-100">
                 <div class="row">
                     <div class="col-6"><button type="button" class="btn btn-primary btn-sm btn-block" id="add-text"><i class="fa fa-text-width" aria-hidden="true"></i> Add text</button></div>
                     <div class="col-6"><button type="button" class="btn btn-primary btn-sm btn-block" id="add-questions"><i class="fa fa-question" aria-hidden="true"></i> Add Question</button></div>

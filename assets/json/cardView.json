@@ -6,14 +6,14 @@
             {
                 "id": "Sender",
                 "type": "TextBlock",
-                "text": "${creator[0].displayName} sent a Quiz(WebcraftIT)",
+                "text": "${creator[0].displayName} sent a Training",
                 "size": "small",
                 "wrap": true
             },
             {
                 "id": "Expiry",
                 "type": "TextBlock",
-                "text": "${if(equals(action.status, 'Active'), 'Quiz Active','Quiz Expired')}",
+                "text": "${if(equals(action.status, 'Active'), 'Training Active','Training Expired')}",
                 "color": "${if(equals(action.status, 'Active'), 'default','attention')}",
                 "size": "small",
                 "wrap": true
