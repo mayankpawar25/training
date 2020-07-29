@@ -11,7 +11,7 @@ let question_section = '';
 let opt = '';
 
 /***********************************  Add Questions *********************************/
-$(document).on("click", "#add-questions", function () {
+$(document).on("click", "#add-questions", function() {
 
     $('.section-2').hide();
     $('.section-2-footer').hide();
@@ -27,7 +27,7 @@ $(document).on("click", "#add-questions", function () {
     $('form.sec1').append(question_footer);
 
     var question_counter = 0;
-    $("div.question-container:visible").each(function (index, elem) {
+    $("div.question-container:visible").each(function(index, elem) {
         question_counter = index + 1;
         $(elem)
             .find("span.question-number")
@@ -37,12 +37,12 @@ $(document).on("click", "#add-questions", function () {
 
 });
 
-$(document).on("click", "#add-questions-same-section", function () {
+$(document).on("click", "#add-questions-same-section", function() {
     var question_counter;
     $('form.sec1').append(questions_section);
     $('form > .question_button').remove();
 
-    $("div.question-container:visible").each(function (index, elem) {
+    $("div.question-container:visible").each(function(index, elem) {
         question_counter = index + 1;
         $(elem)
             .find("span.question-number")
@@ -54,7 +54,7 @@ $(document).on("click", "#add-questions-same-section", function () {
     $('form.sec1').append(add_question_button);
 });
 
-$(document).on("click", "#back-question", function () {
+$(document).on("click", "#back-question", function() {
     $(".question-section").hide();
     $(".add_question_button").hide();
     $(".question-footer").hide();
@@ -65,7 +65,7 @@ $(document).on("click", "#back-question", function () {
 });
 
 /* Remove Questions */
-$(document).on("click", ".remove-question", function () {
+$(document).on("click", ".remove-question", function() {
     var element = $(this);
     var data_id = $(this).parents('.question-container').attr('id');
 
@@ -99,12 +99,12 @@ $(document).on("click", ".remove-question", function () {
     }
 });
 
-$(document).on("click", "#delete-question", function () {
+$(document).on("click", "#delete-question", function() {
     var element = $(this).attr('data-id');
     $("#exampleModalCenter").modal("hide");
     $('#' + element).parents('div.question-section.pt-4').remove();
     var question_counter;
-    $("div.question-container:visible").each(function (index, elem) {
+    $("div.question-container:visible").each(function(index, elem) {
         question_counter = index + 1;
         $(elem).find("span.question-number").text(question_counter);
         $(elem).attr({ id: "question" + question_counter });
@@ -112,11 +112,11 @@ $(document).on("click", "#delete-question", function () {
 });
 
 /* Add Options */
-$(document).on("click", ".add-options", function () {
+$(document).on("click", ".add-options", function() {
     if (
         $(this)
-            .parents("div.container")
-            .find("div.option-div > div.input-group > input[type='text']").length >=
+        .parents("div.container")
+        .find("div.option-div > div.input-group > input[type='text']").length >=
         10
     ) {
         $("#exampleModalCenter")
@@ -154,7 +154,7 @@ $(document).on("click", ".add-options", function () {
     var selector = $(this).parents("div.container");
     $(selector)
         .find('div.option-div > div.input-group > input[type="text"]')
-        .each(function (index, elem) {
+        .each(function(index, elem) {
             var counter = index + 1;
             $(elem).attr({
                 placeholder: "Option " + counter,
@@ -168,7 +168,7 @@ $(document).on("click", ".add-options", function () {
 });
 
 /* Remove Options */
-$(document).on("click", ".remove-option", function (eve) {
+$(document).on("click", ".remove-option", function(eve) {
     if (
         $(this).parents("div.question-container").find("div.option-div").length > 2
     ) {
@@ -176,7 +176,7 @@ $(document).on("click", ".remove-option", function (eve) {
         $(this).parents("div.option-div").remove();
         $(selector)
             .find('div.option-div > div.input-group > input[type="text"]')
-            .each(function (index, elem) {
+            .each(function(index, elem) {
                 var counter = index + 1;
                 $(elem).attr({
                     placeholder: "Option " + counter,
@@ -217,7 +217,7 @@ $(document).on("click", ".remove-option", function (eve) {
     }
 });
 
-$(document).on("click", "#question-done", function () {
+$(document).on("click", "#question-done", function() {
     $('#question-done').prop('disabled', true);
 
     /* Validate */
@@ -231,7 +231,7 @@ $(document).on("click", "#question-done", function () {
 
     $("form")
         .find("input[type='text']")
-        .each(function () {
+        .each(function() {
             var element = $(this);
             if (element.val() == "") {
                 validate = false;
@@ -273,12 +273,12 @@ $(document).on("click", "#question-done", function () {
 
         $(".question-section > #question" + i)
             .find("div.option-div")
-            .each(function (index, elem) {
+            .each(function(index, elem) {
                 var count = index + 1;
                 if (
                     $(".question-section > #question" + i)
-                        .find("#check" + count)
-                        .is(":checked")
+                    .find("#check" + count)
+                    .is(":checked")
                 ) {
                     // if it is checked
                     is_selected++;
@@ -327,13 +327,13 @@ $(document).on("click", "#question-done", function () {
             /* Looping for options */
             $("#question" + j)
                 .find("div.option-div")
-                .each(function (index, elem) {
+                .each(function(index, elem) {
                     var count = index + 1;
 
                     if (
                         $("#question" + j)
-                            .find("#check" + count)
-                            .is(":checked")
+                        .find("#check" + count)
+                        .is(":checked")
                     ) {
                         var opt_data = $(elem).find('input[id^="option"]').val();;
 
@@ -378,7 +378,7 @@ $(document).on("click", "#question-done", function () {
             </div>`);
             $('#quest-text-' + text_number).html(question_inputs);
 
-            $("form.sec1 div.section-2:visible div#root .card-box").each(function (index, obj) {
+            $("form.sec1 div.section-2:visible div#root .card-box").each(function(index, obj) {
                 $(this).attr({ 'data-id': 'text-section-' + index });
                 $(this).find('span.counter').text(index);
             });
@@ -392,7 +392,7 @@ $(document).on("click", "#question-done", function () {
 
 /***********************************  Add Text *********************************/
 /* Add Text */
-$(document).on("click", "#add-text", function () {
+$(document).on("click", "#add-text", function() {
 
     $('.section-2').hide();
     $('.section-2-footer').hide();
@@ -406,13 +406,13 @@ $(document).on("click", "#add-text", function () {
     $('form.sec1').append(add_text_footer);
 });
 
-$(document).on("click", ".show-setting", function () {
+$(document).on("click", ".show-setting", function() {
     $(".section-1").hide();
     $(".section-1-footer").hide();
     $("form #setting").show();
 });
 
-$(document).on("click", "#back-text", function () {
+$(document).on("click", "#back-text", function() {
     $(".text-section").hide();
     $(".text-footer").hide();
 
@@ -420,7 +420,7 @@ $(document).on("click", "#back-text", function () {
     $(".section-2-footer").show();
 });
 
-$(document).on("click", "#text-done", function () {
+$(document).on("click", "#text-done", function() {
     var error_text = "";
     $("textarea").removeClass('danger');
     $("label.label-alert").remove();
@@ -464,7 +464,7 @@ $(document).on("click", "#text-done", function () {
             </div>`);
 
 
-        $("form.sec1 div.section-2:visible div#root .card-box").each(function (index, obj) {
+        $("form.sec1 div.section-2:visible div#root .card-box").each(function(index, obj) {
             $(this).attr({ 'data-id': 'text-section-' + index });
             $(this).find('span.counter').text(index);
         });
@@ -472,7 +472,7 @@ $(document).on("click", "#text-done", function () {
     }
 });
 
-$(document).on("click", ".remove-text", function () {
+$(document).on("click", ".remove-text", function() {
     var element = '';
     var data_id = $(this).parents('.card-box').attr('data-id');
 
@@ -493,11 +493,11 @@ $(document).on("click", ".remove-text", function () {
 
 });
 
-$(document).on("click", "#confirm-delete-text", function () {
+$(document).on("click", "#confirm-delete-text", function() {
     var eve = $(this).attr('data-id');
 
     $('div.card-box[data-id="' + eve + '"]').remove();
-    $("form.sec1 div.section-2:visible div#root .card-box").each(function (index, obj) {
+    $("form.sec1 div.section-2:visible div#root .card-box").each(function(index, obj) {
         $(this).find('span.counter').text(index);
     });
 
@@ -506,14 +506,14 @@ $(document).on("click", "#confirm-delete-text", function () {
 });
 
 
-$(document).on("click", "#next", function () {
+$(document).on("click", "#next", function() {
     /* Validate */
     var error_text = "";
     var question_number = 0;
 
     $("form")
         .find("input[type='text']")
-        .each(function () {
+        .each(function() {
             var element = $(this);
             if (element.val() == "") {
                 validate = false;
@@ -522,9 +522,9 @@ $(document).on("click", "#next", function () {
                     if (
                         question_number !=
                         element
-                            .parents("div.form-group")
-                            .find("span.question-number")
-                            .text()
+                        .parents("div.form-group")
+                        .find("span.question-number")
+                        .text()
                     ) {
                         question_number = element
                             .parents("div.form-group")
@@ -578,7 +578,7 @@ $(document).on("click", "#next", function () {
 
 
 /***********************************  Submit Training *********************************/
-$(document).on("click", "#submit", function () {
+$(document).on("click", "#submit", function() {
     $("#submit").prop('disabled', true);
     submitForm();
 });
@@ -586,26 +586,27 @@ $(document).on("click", "#submit", function () {
 function submitForm() {
     actionSDK
         .executeApi(new actionSDK.GetContext.Request())
-        .then(function (response) {
+        .then(function(response) {
             console.info("GetContext - Response: " + JSON.stringify(response));
             createAction(response.context.actionPackageId);
         })
         /* .catch(function (error) {
             console.error("GetContext - Error: " + JSON.stringify(error));
-        }) */;
+        }) */
+    ;
 }
 
 function getQuestionSet() {
     questions = new Array();
 
-    $("form div.section-2 #root").find('.section-div').each(function (index, elem) {
+    $("form div.section-2 #root").find('.section-div').each(function(index, elem) {
         if ($(elem).hasClass("question-section-div") == true) {
             /* Get Questions */
             var option_type = actionSDK.ActionDataColumnValueType.SingleOption;
             var question_id = $(elem).find('span.counter').text();
             let option = [];
 
-            $(elem).find("div.option-div").each(function (ind, e) {
+            $(elem).find("div.option-div").each(function(ind, e) {
                 var count = ind + 1;
                 var opt_id = "question" + question_id + "option" + count;
                 var opt_title = $("div.section-2 #quest-text-" + question_id).find("#option" + count).val();
@@ -637,6 +638,7 @@ function getQuestionSet() {
             let option = [];
             var opt_id = $(elem).find('span.counter').text();
             var opt_title = $(elem).find('textarea').val();
+            console.log(`name: ${opt_id}, displayName: ${opt_title}`);
             option.push({ name: opt_id, displayName: opt_title });
 
             var val = {
@@ -656,19 +658,21 @@ function getQuestionSet() {
 function getCorrectAnswer() {
     let correct_option = [];
 
-    $("form div.section-2 #root").find('.section-div').each(function (index, elem) {
+    $("form div.section-2 #root").find('.section-div').each(function(index, elem) {
         var correct = [];
         var question_id = $(elem).find('span.counter').text();
-        $(elem).find("div.option-div").each(function (ind, e) {
-            var count = ind + 1;
-            if ($(elem).hasClass("question-section-div") == true) {
+        if ($(elem).hasClass("question-section-div") == true) {
+            $(elem).find("div.option-div").each(function(ind, e) {
+                var count = ind + 1;
                 var opt_id = "question" + question_id + "option" + count;
-            } else if ($(elem).hasClass("text-section-div") == true) {
-                var opt_id = "question" + question_id + "option";
-            }
-            // if it is checked
+
+                // if it is checked
+                correct.push(opt_id);
+            });
+        } else if ($(elem).hasClass("text-section-div") == true) {
+            var opt_id = "question" + question_id;
             correct.push(opt_id);
-        });
+        }
         correct_option[question_id] = correct;
     });
 
@@ -687,13 +691,13 @@ function getCorrectAnswer() {
         /* Looping for options */
         $("div.section-2  #question" + i)
             .find("div.option-div")
-            .each(function (index, elem) {
+            .each(function(index, elem) {
                 var count = index + 1;
 
                 if (
                     $("div.section-2  #question" + i)
-                        .find("#check" + count)
-                        .is(":checked")
+                    .find("#check" + count)
+                    .is(":checked")
                 ) {
                     var opt_id = "question" + i + "option" + count;
 
@@ -766,7 +770,7 @@ function createAction(actionPackageId) {
             itemsEditable: false,
             canUserAddMultipleItems: false,
             dataColumns: questionsSet,
-        },],
+        }, ],
     };
     console.log("action: ");
     console.log(JSON.stringify(action));
@@ -774,23 +778,23 @@ function createAction(actionPackageId) {
     var request = new actionSDK.CreateAction.Request(action);
     actionSDK
         .executeApi(request)
-        .then(function (response) {
+        .then(function(response) {
             console.info("CreateAction - Response: " + JSON.stringify(response));
         })
-        .catch(function (error) {
+        .catch(function(error) {
             console.error("CreateAction - Error: " + JSON.stringify(error));
         });
 }
 
 function generateGUID() {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
         var r = (Math.random() * 16) | 0,
             v = c == "x" ? r : (r & 0x3) | 0x8;
         return v.toString(16);
     });
 }
 
-$(document).ready(function () {
+$(document).ready(function() {
     let request = new actionSDK.GetContext.Request();
     getTheme(request);
 });
@@ -831,7 +835,7 @@ async function getTheme(request) {
     }, 1000);
 }
 
-$(document).on("click", "#back", function () {
+$(document).on("click", "#back", function() {
     $(".section-2").hide();
     $(".section-2-footer").hide();
 
@@ -839,7 +843,7 @@ $(document).on("click", "#back", function () {
     $(".section-1-footer").show();
 });
 
-$(document).on("click", "#back-setting", function () {
+$(document).on("click", "#back-setting", function() {
     $(".section-1").show();
     $(".section-1-footer").show();
 
@@ -848,7 +852,7 @@ $(document).on("click", "#back-setting", function () {
     $('#due').text(setting_text);
 });
 
-$(document).on("change", "#expiry-date, #expiry-time, .visible-to", function () {
+$(document).on("change", "#expiry-date, #expiry-time, .visible-to", function() {
     var end = new Date($('input[name="expiry_date"]').val() + ' ' + $('input[name="expiry_time"]').val());
     var start = new Date();
     var days = calc_date_diff(start, end);
@@ -912,14 +916,14 @@ function calc_date_diff(start, end) {
     }
 }
 
-$(document).on('click', '#next1', function () {
+$(document).on('click', '#next1', function() {
     $("input[type='text']").removeClass("danger");
     $("label.label-alert").remove();
     $("div.card-box-alert").removeClass("card-box-alert").addClass("card-box");
 
     $("form > .section-1")
         .find("input[type='text']")
-        .each(function () {
+        .each(function() {
             var element = $(this);
             if (element.val() == "") {
                 validate = false;
