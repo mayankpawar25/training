@@ -1,6 +1,6 @@
 import * as actionSDK from "action-sdk-sunny";
 
-$(document).ready(function () {
+$(document).ready(function() {
     OnPageLoad();
 });
 
@@ -36,12 +36,12 @@ var root = document.getElementById("root");
 function OnPageLoad() {
     actionSDK
         .executeApi(new actionSDK.GetContext.Request())
-        .then(function (response) {
+        .then(function(response) {
             console.info("GetContext - Response: " + JSON.stringify(response));
             actionContext = response.context;
             getDataRows(response.context.actionId);
         })
-        .catch(function (error) {
+        .catch(function(error) {
             console.error("GetContext - Error: " + JSON.stringify(error));
         });
 }
@@ -61,7 +61,7 @@ function getDataRows(actionId) {
 
     actionSDK
         .executeBatchApi(batchRequest)
-        .then(function (batchResponse) {
+        .then(function(batchResponse) {
             console.info("BatchResponse: " + JSON.stringify(batchResponse));
             actionInstance = batchResponse.responses[0].action;
             actionSummary = batchResponse.responses[1].summary;
@@ -69,7 +69,7 @@ function getDataRows(actionId) {
             actionDataRowsLength = actionDataRows == null ? 0 : actionDataRows.length;
             createBody();
         })
-        .catch(function (error) {
+        .catch(function(error) {
             console.log("Console log: Error: " + JSON.stringify(error));
         });
 }
@@ -245,7 +245,7 @@ function getNonresponders() {
     }
 }
 
-$(document).on("click", ".getresult", function () {
+$(document).on("click", ".getresult", function() {
     var userId = $(this).attr("id");
     console.log(userId);
 
@@ -385,7 +385,7 @@ function createReponderQuestionView(userId) {
     total = count;
     var scorePercentage = Math.round((score / total) * 100);
 
-    $("#root > div.progress-section").after(`<div class=""><h4><strong>Score: </strong>${scorePercentage}%</h4></div>`);
+    // $("#root > div.progress-section").after(`<div class=""><h4><strong>Score: </strong>${scorePercentage}%</h4></div>`);
 }
 
 function createQuestionView(userId) {
@@ -510,7 +510,7 @@ function createQuestionView(userId) {
     console.log(`${score} / ${total}`);
     var scorePercentage = Math.round((score / total) * 100);
 
-    $("#root > div:first").after(`<div class=""><h4><strong>Score: </strong>${scorePercentage}%</h4></div>`);
+    // $("#root > div:first").after(`<div class=""><h4><strong>Score: </strong>${scorePercentage}%</h4></div>`);
 }
 
 function getOptions(text, name, id, userResponse, correctAnswer) {
@@ -577,16 +577,16 @@ function footer1() {
     );
 }
 
-$(document).on("click", ".back", function () {
+$(document).on("click", ".back", function() {
     createBody();
 });
 
-$(document).on("click", ".back1", function () {
+$(document).on("click", ".back1", function() {
     var userId = $(this).attr("userid-data");
     create_responder_nonresponders();
 });
 
-$(document).on("click", "#show-responders", function () {
+$(document).on("click", "#show-responders", function() {
     create_responder_nonresponders();
 });
 

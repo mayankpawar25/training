@@ -6,6 +6,7 @@ import * as actionSDK from "action-sdk-sunny";
 var $root = "";
 let row = {};
 let actionInstance = null;
+let summary_answer_resp = [];
 
 async function getTheme(request) {
     let response = await actionSDK.executeApi(request);
@@ -32,7 +33,7 @@ async function getTheme(request) {
 }
 
 // *********************************************** HTML ELEMENT***********************************************
-$(document).ready(function () {
+$(document).ready(function() {
     let request = new actionSDK.GetContext.Request();
     getTheme(request);
 });
@@ -40,11 +41,11 @@ $(document).ready(function () {
 function OnPageLoad() {
     actionSDK
         .executeApi(new actionSDK.GetContext.Request())
-        .then(function (response) {
+        .then(function(response) {
             console.info("GetContext - Response: " + JSON.stringify(response));
             getActionInstance(response.context.actionId);
         })
-        .catch(function (error) {
+        .catch(function(error) {
             console.error("GetContext - Error: " + JSON.stringify(error));
         });
 }
@@ -52,12 +53,12 @@ function OnPageLoad() {
 function getActionInstance(actionId) {
     actionSDK
         .executeApi(new actionSDK.GetAction.Request(actionId))
-        .then(function (response) {
+        .then(function(response) {
             console.info("Response: " + JSON.stringify(response));
             actionInstance = response.action;
             createBody();
         })
-        .catch(function (error) {
+        .catch(function(error) {
             console.log("Error: " + JSON.stringify(error));
         });
 }
@@ -121,7 +122,7 @@ function createBody() {
     }
 }
 
-$(document).on('click', '.submit-form', function () {
+$(document).on('click', '.submit-form', function() {
     submitForm();
 })
 
@@ -202,9 +203,9 @@ function getCheckboxButton(text, name, id) {
     return div_data;
 }
 
-$(document).on('click', 'div.radio-section', function () {
+/* $(document).on('click', 'div.radio-section', function() {
     radiobuttonclick($(this).id, $(this).attr('columnId'));
-})
+}) */
 
 
 function numbertowords(num) {
@@ -244,6 +245,45 @@ function numbertowords(num) {
     }
 }
 
+function loadSummaryView() {
+    console.log('call');
+    $('div.section-2').hide();
+    $('div.section-2-footer').hide();
+    $('div.section-2').after(`<div class="section-3"><div class="container pt-4"><label><strong>Training Summary</strong></label></div><div class="container pb-100"></div></div>`);
+
+    $('div.section-3 .container:first').append(head_section1);
+    $('div.section-3 .container:first').after(footer_section3);
+    $('div.section-3 #section1-training-title').html(actionInstance.displayName);
+    $('div.section-3 #section1-training-description').html(actionInstance.customProperties[0].value);
+
+    /* Create Text and Question summary */
+    actionInstance.dataTables.forEach((dataTable) => {
+        dataTable.dataColumns.forEach((data, ind) => {
+            if (data.valueType == 'LargeText') {
+                /* Call Text Section 1 */
+                var counter = $('.section-3 div.card-box').length;
+                var text_title = data.displayName.length > 100 ? data.displayName.substr(0, data.displayName.lastIndexOf(' ', 97)) + '...' : data.displayName;
+                $('div.section-3 .container:first').append(text_section1);
+                $('div.card-box:last').find('span.counter').text(counter);
+                $('div.card-box:last').find('.text-description').text(text_title);
+            } else if (data.valueType == 'SingleOption' || data.valueType == 'MultiOption') {
+                /* Call Question Section 1 */
+                var counter = $('.section-3 div.card-box').length;
+                var text_title = data.displayName.length > 100 ? data.displayName.substr(0, data.displayName.lastIndexOf(' ', 97)) + '...' : data.displayName;
+                $('div.section-3 .container:first').append(question_section1);
+                $('div.card-box:last').find('span.counter').text(counter);
+                $('div.card-box:last').find('.question-title').text(`Question with ${numbertowords(Object.keys(data.options).length)} options`);
+                $('div.card-box:last').find('.question-title-main').text(text_title);
+                if (actionInstance.customProperties[3].value == 'Yes') {
+                    $('div.card-box:last').find('.result').text(summary_answer_resp[ind] == true ? 'Correct' : 'Incorrect');
+                }
+            }
+        });
+    });
+    console.log(`summary_answer_resp ${summary_answer_resp}`);
+}
+
+
 // *********************************************** HTML ELEMENT END***********************************************
 
 // *********************************************** SUBMIT ACTION***********************************************
@@ -251,86 +291,19 @@ function numbertowords(num) {
 function submitForm() {
     actionSDK
         .executeApi(new actionSDK.GetContext.Request())
-        .then(function (response) {
+        .then(function(response) {
             console.info("GetContext - Response: " + JSON.stringify(response));
-
-            /*  Check Show Correct Answer  */
-            if (Object.keys(row).length > 0) {
-                if (actionInstance.customProperties[3].value == 'Yes') {
-                    var correct_answer = $.parseJSON(actionInstance.customProperties[4].value);
-                    console.log('correct_answer: ');
-                    console.log(correct_answer);
-                    var count = 0;
-
-                    var ans_rsp = '';
-                    $('#root').find('div.card-box').each(function (i, val) {
-
-                        var searchIDs = $(val).find('input:checked').map(function () {
-                            return $(this).attr('id');
-                        });
-
-                        var correct_ans = '';
-                        var your_ans = '';
-
-                        if (JSON.stringify(correct_answer[count]) == JSON.stringify(searchIDs.get())) {
-                            /*  Answer is correct  */
-                            $.each(correct_answer[count], function (ind, ans_id) {
-                                correct_ans += '<div class="alert alert-success"><p class="mb0">' + $.trim($(val).find('input#' + ans_id).parents('label').text()) + '<i class="fa fa-pull-right fa-check"></i></p></div>';
-                            });
-                            console.log('correct_ans' + correct_ans);
-
-                            ans_rsp += '<p class="mb0"><strong>' + (i + 1) + '. Your Answer is right. </strong ></p> <p> Your answer is </p>' + correct_ans;
-
-                        } else {
-                            /*  Answer is incorrect  */
-                            $.each(searchIDs.get(), function (yind, yans_id) {
-                                console.log('your ans: ' + $(val).find('input#' + yans_id).attr('id'));
-                                console.log(JSON.stringify(correct_answer[count]));
-                                if ($.inArray($(val).find('input#' + yans_id).attr('id'), correct_answer[count]) != -1) {
-                                    // found it
-                                    your_ans += '<div class="alert alert-success"><p class="mb0">' + $.trim($(val).find('input#' + yans_id).parents('label').text()) + '<i class="fa fa-pull-right fa-check"></i></p></div>';
-                                } else {
-                                    your_ans += '<div class="alert alert-danger"><p class="mb0">' + $.trim($(val).find('input#' + yans_id).parents('label').text()) + '<i class="fa fa-pull-right fa-close"></i></p></div>';
-                                }
-                            })
-
-                            $.each(correct_answer[count], function (ind, ans_id) {
-                                correct_ans += '<div class="alert alert-success"><p class="mb0">' + $.trim($(val).find('input#' + ans_id).parents('label').text()) + '<i class="fa fa-pull-right fa-check"></i></p></div>';
-                            })
-
-                            ans_rsp += '<p class="mb0"><strong>' + (i + 1) + '. Your Answer is wrong. </strong></p> <p>Your Answer is </p> ' + your_ans + ' <p> Right Answer is </p>' + correct_ans;
-                            console.log(`hr: ${count} : ${$('#root').find('div.card-box').length}`)
-                            if (count != 1 || count + 1 != $('#root').find('div.card-box').length) {
-                                ans_rsp += '<hr>';
-                            }
-                        }
-                        count++;
-                    });
-
-                    $('#exampleModalCenter').find('#exampleModalLongTitle').html('<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" class="gt gs mt--4"><g><g><g><path d="M507.113,428.415L287.215,47.541c-6.515-11.285-18.184-18.022-31.215-18.022c-13.031,0-24.7,6.737-31.215,18.022L4.887,428.415c-6.516,11.285-6.516,24.76,0,36.044c6.515,11.285,18.184,18.022,31.215,18.022h439.796c13.031,0,24.7-6.737,31.215-18.022C513.629,453.175,513.629,439.7,507.113,428.415z M481.101,449.441c-0.647,1.122-2.186,3.004-5.202,3.004H36.102c-3.018,0-4.556-1.881-5.202-3.004c-0.647-1.121-1.509-3.394,0-6.007L250.797,62.559c1.509-2.613,3.907-3.004,5.202-3.004c1.296,0,3.694,0.39,5.202,3.004L481.1,443.434C482.61,446.047,481.748,448.32,481.101,449.441z"/><rect x="240.987" y="166.095" width="30.037" height="160.197" /><circle cx="256.005" cy="376.354" r="20.025" /></g></g></g > <g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg > Answer response!');
-                    $('#exampleModalCenter').find('.modal-body').html(ans_rsp);
-                    $('#exampleModalCenter').find('.modal-footer').html('<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Next</button>');
-                    $('#exampleModalCenter').find('#save-changes').hide();
-                    $('#exampleModalCenter').modal('show');
-
-                    $("#exampleModalCenter").on("hidden.bs.modal", function () {
-                        // put your default event here
-                        addDataRows(response.context.actionId);
-                    });
-                } else {
-                    addDataRows(response.context.actionId);
-                }
-            }
+            addDataRows(response.context.actionId);
         })
-        .catch(function (error) {
+        .catch(function(error) {
             console.error("GetContext - Error: " + JSON.stringify(error));
         });
 }
 
-function radiobuttonclick(questionResponse, colomnId) {
+/* function radiobuttonclick(questionResponse, colomnId) {
     var data = [];
     row = {};
-    $.each($("input[type='checkbox']:checked"), function (ind, v) {
+    $.each($("input[type='checkbox']:checked"), function(ind, v) {
         var col = $(this).parents("div.form-group").attr("columnid");
         data.push($(this).attr("id"));
 
@@ -340,7 +313,7 @@ function radiobuttonclick(questionResponse, colomnId) {
         $('#next').prop('disabled', false);
     });
 
-    $.each($("input[type='radio']:checked"), function () {
+    $.each($("input[type='radio']:checked"), function() {
         var col = $(this).parents("div.form-group").attr("columnid");
 
         if (!row[col]) row[col] = [];
@@ -352,10 +325,10 @@ function radiobuttonclick(questionResponse, colomnId) {
 
 
     // console.log(row);
-}
+} */
 
 function generateGUID() {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
         var r = (Math.random() * 16) | 0,
             v = c == "x" ? r : (r & 0x3) | 0x8;
         return v.toString(16);
@@ -385,10 +358,10 @@ function addDataRows(actionId) {
     ]);
     actionSDK
         .executeBatchApi(batchRequest)
-        .then(function (batchResponse) {
+        .then(function(batchResponse) {
             console.info("BatchResponse: " + JSON.stringify(batchResponse));
         })
-        .catch(function (error) {
+        .catch(function(error) {
             console.error("Error: " + JSON.stringify(error));
         });
 }
@@ -429,7 +402,7 @@ function createTrainingSection(index_num) {
 // *********************************************** SUBMIT ACTION END***********************************************
 // *********************************************** OTHER ACTION STARTS***********************************************
 let pagination = 0;
-$(document).on('click', '#start', function () {
+$(document).on('click', '#start', function() {
     $('div.section-1').hide();
     $('div.section-1-footer').hide();
     $('div.section-1').after(`<div class="section-2"><div class="container pt-4"></div></div>`);
@@ -446,7 +419,8 @@ $(document).on('click', '#start', function () {
 
 });
 
-$(document).on('click', '#next', function () {
+$(document).on('click', '#next', function() {
+    var data = [];
 
     /* Validate */
     if ($('div.card-box:visible').find('.training-type').text() == 'Question') {
@@ -455,13 +429,28 @@ $(document).on('click', '#next', function () {
         var check_counter = 0;
         var correct_answer = false;
         var attr_name = '';
-        $('div.card-box:visible').find("input").each(function (ind, ele) {
+        $('div.card-box:visible').find("input[type='checkbox']:checked").each(function(ind, ele) {
             if ($(ele).is(':checked')) {
                 check_counter++;
-                selected_answer.push($.trim($('div.card-box:visible').find("input:checked").parent('label').text()));
+                // selected_answer.push($.trim($(ele).parent('label').text()));
+                selected_answer.push($.trim($(ele).attr('id')));
                 attr_name = $(ele).attr('name');
+                data.push($(this).attr("id"));
             }
-        })
+        });
+        if (!row[(pagination + 1)]) row[(pagination + 1)] = [];
+        row[(pagination + 1)] = JSON.stringify(data);
+
+        $('div.card-box:visible').find("input[type='radio']:checked").each(function(ind, ele) {
+            if ($(ele).is(':checked')) {
+                check_counter++;
+                selected_answer.push($.trim($(ele).attr('id')));
+                attr_name = $(ele).attr('name');
+
+                if (!row[(pagination + 1)]) row[(pagination + 1)] = [];
+                row[(pagination + 1)] = $(this).attr("id");
+            }
+        });
 
         if (check_counter <= 0) {
             $('#next').prop('disabled', true);
@@ -469,37 +458,73 @@ $(document).on('click', '#next', function () {
             $('#next').prop('disabled', false);
         }
 
-        console.log(`selected_answer ${selected_answer}`);
         /* Validate if show answer is Yes */
         var answerKeys = JSON.parse(actionInstance.customProperties[4].value);
         var correct_ans_arr = [];
 
-        $.each(selected_answer, function (i, selected_subarray) {
+        console.log(`selected_answer:`)
+        console.log(selected_answer)
+        console.log(answerKeys)
+        console.log(attr_name)
+        $.each(selected_answer, function(i, selected_subarray) {
+            console.log(answerKeys.toString());
             if ($.inArray(selected_subarray, answerKeys[(attr_name - 1)]) !== -1) {
                 correct_answer = true;
             }
         });
 
-        answerKeys[(attr_name - 1)].forEach(function (subarr) {
-            correct_ans_arr.push($.trim($('#' + subarr).parent('label').text()));
+        summary_answer_resp.push(correct_answer)
+
+        /* console.log(attr_name - 1);
+        console.log(answerKeys[(attr_name - 1)].toString()); */
+        $.each(answerKeys[(attr_name - 1)], function(ii, subarr) {
+            correct_ans_arr.push($.trim($('#' + subarr).text()));
         });
 
 
 
         var correct_value = correct_ans_arr.join();
+        pagination++;
 
         if (correct_answer == true) {
-            $('#exampleModalCenter').find('#exampleModalLongTitle').html('<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" class="gt gs mt--4"><g><g><g><path d="M507.113,428.415L287.215,47.541c-6.515-11.285-18.184-18.022-31.215-18.022c-13.031,0-24.7,6.737-31.215,18.022L4.887,428.415c-6.516,11.285-6.516,24.76,0,36.044c6.515,11.285,18.184,18.022,31.215,18.022h439.796c13.031,0,24.7-6.737,31.215-18.022C513.629,453.175,513.629,439.7,507.113,428.415z M481.101,449.441c-0.647,1.122-2.186,3.004-5.202,3.004H36.102c-3.018,0-4.556-1.881-5.202-3.004c-0.647-1.121-1.509-3.394,0-6.007L250.797,62.559c1.509-2.613,3.907-3.004,5.202-3.004c1.296,0,3.694,0.39,5.202,3.004L481.1,443.434C482.61,446.047,481.748,448.32,481.101,449.441z"/><rect x="240.987" y="166.095" width="30.037" height="160.197" /><circle cx="256.005" cy="376.354" r="20.025" /></g></g></g > <g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg > Answer response!');
-            $('#exampleModalCenter').find('.modal-body').html(`<label><strong>Correct</strong></label><p><label>Your Answer</label><br>${correct_value}</p>`);
-            $('#exampleModalCenter').find('.modal-footer').html('<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Continue</button>');
-            $('#exampleModalCenter').find('#save-changes').hide();
-            $('#exampleModalCenter').modal('show');
+            if (actionInstance.customProperties[3].value == 'Yes' && $('div.card-box:visible').find("input").attr('disabled') !== "disabled") {
+                $('#exampleModalCenter').find('#exampleModalLongTitle').html('<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" class="gt gs mt--4"><g><g><g><path d="M507.113,428.415L287.215,47.541c-6.515-11.285-18.184-18.022-31.215-18.022c-13.031,0-24.7,6.737-31.215,18.022L4.887,428.415c-6.516,11.285-6.516,24.76,0,36.044c6.515,11.285,18.184,18.022,31.215,18.022h439.796c13.031,0,24.7-6.737,31.215-18.022C513.629,453.175,513.629,439.7,507.113,428.415z M481.101,449.441c-0.647,1.122-2.186,3.004-5.202,3.004H36.102c-3.018,0-4.556-1.881-5.202-3.004c-0.647-1.121-1.509-3.394,0-6.007L250.797,62.559c1.509-2.613,3.907-3.004,5.202-3.004c1.296,0,3.694,0.39,5.202,3.004L481.1,443.434C482.61,446.047,481.748,448.32,481.101,449.441z"/><rect x="240.987" y="166.095" width="30.037" height="160.197" /><circle cx="256.005" cy="376.354" r="20.025" /></g></g></g > <g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg > Answer response!');
+                $('#exampleModalCenter').find('.modal-body').html(`<label><strong>Correct</strong></label><p><label>Your Answer</label><br>${correct_value}</p>`);
+                $('#exampleModalCenter').find('.modal-footer').html('<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Continue</button>');
+                $('#exampleModalCenter').find('#save-changes').hide();
+                $('#exampleModalCenter').modal('show');
 
-            $("#exampleModalCenter").on("hidden.bs.modal", function () {
-                // put your default event here
-                // addDataRows(response.context.actionId);
+                $("#exampleModalCenter").on("hidden.bs.modal", function() {
+                    // put your default event here
+                    // addDataRows(response.context.actionId);
+                    $('div.card-box:visible').find("input").each(function(ind, ele) {
+                        $(ele).prop('disabled', true);
+                    });
 
-                pagination++;
+                    var limit = $('#y').text();
+                    console.log(`${pagination} < ${limit}`);
+
+                    if (pagination < limit) {
+                        $('#next').prop('disabled', false);
+                        $('#back').prop('disabled', false);
+
+                        $('div.section-2 > .container:first > div.card-box:nth-child(' + pagination + ')').hide();
+                        console.log(`next section ${$('div.section-2 > .container:first > div.card-box').length} <= ${pagination}`)
+                        if ($('div.section-2 > .container:first > div.card-box').length <= pagination) {
+                            createTrainingSection(pagination);
+                        } else {
+                            console.log(pagination);
+                            $('div.section-2 > .container:first > div.card-box:nth-child(' + (pagination + 1) + ')').show();
+                            console.log(pagination + 1);
+                        }
+                        $('#x').text((pagination + 1));
+
+                    } else {
+                        /* Show Summary */
+                        $('#next').prop('disabled', true);
+                    }
+                });
+            } else {
                 var limit = $('#y').text();
                 console.log(`${pagination} < ${limit}`);
 
@@ -521,28 +546,86 @@ $(document).on('click', '#next', function () {
                     /* Show Summary */
                     $('#next').prop('disabled', true);
                 }
-            });
-
+            }
         } else {
-            $('#exampleModalCenter').find('#exampleModalLongTitle').html('<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" class="gt gs mt--4"><g><g><g><path d="M507.113,428.415L287.215,47.541c-6.515-11.285-18.184-18.022-31.215-18.022c-13.031,0-24.7,6.737-31.215,18.022L4.887,428.415c-6.516,11.285-6.516,24.76,0,36.044c6.515,11.285,18.184,18.022,31.215,18.022h439.796c13.031,0,24.7-6.737,31.215-18.022C513.629,453.175,513.629,439.7,507.113,428.415z M481.101,449.441c-0.647,1.122-2.186,3.004-5.202,3.004H36.102c-3.018,0-4.556-1.881-5.202-3.004c-0.647-1.121-1.509-3.394,0-6.007L250.797,62.559c1.509-2.613,3.907-3.004,5.202-3.004c1.296,0,3.694,0.39,5.202,3.004L481.1,443.434C482.61,446.047,481.748,448.32,481.101,449.441z"/><rect x="240.987" y="166.095" width="30.037" height="160.197" /><circle cx="256.005" cy="376.354" r="20.025" /></g></g></g > <g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg > Answer response!');
-            $('#exampleModalCenter').find('.modal-body').html(`<label><strong>Incorrect</strong></label><p><label>Correct Answer</label><br>${correct_value}</p>`);
-            $('#exampleModalCenter').find('.modal-footer').html('<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Continue</button>');
-            $('#exampleModalCenter').find('#save-changes').hide();
-            $('#exampleModalCenter').modal('show');
+            if (actionInstance.customProperties[3].value == 'Yes' && $('div.card-box:visible').find("input").attr('disabled') !== "disabled") {
 
-            $("#exampleModalCenter").on("hidden.bs.modal", function () {
-                // put your default event here
-                $('div.card-box:visible').find("input").each(function (ind, ele) {
-                    $(ele).prop('disabled', true);
+                $('#exampleModalCenter').find('#exampleModalLongTitle').html('<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" class="gt gs mt--4"><g><g><g><path d="M507.113,428.415L287.215,47.541c-6.515-11.285-18.184-18.022-31.215-18.022c-13.031,0-24.7,6.737-31.215,18.022L4.887,428.415c-6.516,11.285-6.516,24.76,0,36.044c6.515,11.285,18.184,18.022,31.215,18.022h439.796c13.031,0,24.7-6.737,31.215-18.022C513.629,453.175,513.629,439.7,507.113,428.415z M481.101,449.441c-0.647,1.122-2.186,3.004-5.202,3.004H36.102c-3.018,0-4.556-1.881-5.202-3.004c-0.647-1.121-1.509-3.394,0-6.007L250.797,62.559c1.509-2.613,3.907-3.004,5.202-3.004c1.296,0,3.694,0.39,5.202,3.004L481.1,443.434C482.61,446.047,481.748,448.32,481.101,449.441z"/><rect x="240.987" y="166.095" width="30.037" height="160.197" /><circle cx="256.005" cy="376.354" r="20.025" /></g></g></g > <g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg > Answer response!');
+                $('#exampleModalCenter').find('.modal-body').html(`<label><strong>Incorrect</strong></label><p><label>Correct Answer</label><br>${correct_value}</p>`);
+                $('#exampleModalCenter').find('.modal-footer').html('<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Continue</button>');
+                $('#exampleModalCenter').find('#save-changes').hide();
+                $('#exampleModalCenter').modal('show');
+
+                $("#exampleModalCenter").on("hidden.bs.modal", function() {
+                    // put your default event here
+                    $('div.card-box:visible').find("input").each(function(ind, ele) {
+                        $(ele).prop('disabled', true);
+                    });
+                    var limit = $('#y').text();
+                    console.log(`${pagination} < ${limit}`);
+
+                    if ((pagination) < limit) {
+                        $('#next').prop('disabled', false);
+                        $('#back').prop('disabled', false);
+
+                        $('div.section-2 > .container:first > div.card-box:nth-child(' + pagination + ')').hide();
+                        console.log(`next section ${$('div.section-2 > .container:first > div.card-box').length} <= ${pagination}`)
+                        if ($('div.section-2 > .container:first > div.card-box').length <= pagination) {
+                            createTrainingSection(pagination);
+                        } else {
+                            console.log(pagination);
+                            $('div.section-2 > .container:first > div.card-box:nth-child(' + (pagination + 1) + ')').show();
+                            console.log(pagination + 1);
+                        }
+                        $('#x').text((pagination + 1));
+
+                        summary_answer_resp.push(true);
+
+                    } else {
+                        /* Show Summary */
+                        $('#next').prop('disabled', true);
+                    }
                 });
-            });
+            } else {
+                var limit = $('#y').text();
+                console.log(`${pagination} < ${limit}`);
+
+                if ((pagination) < limit) {
+                    $('#next').prop('disabled', false);
+                    $('#back').prop('disabled', false);
+
+                    $('div.section-2 > .container:first > div.card-box:nth-child(' + pagination + ')').hide();
+                    console.log(`next section ${$('div.section-2 > .container:first > div.card-box').length} <= ${pagination}`)
+                    if ($('div.section-2 > .container:first > div.card-box').length <= pagination) {
+                        createTrainingSection(pagination);
+                    } else {
+                        console.log(pagination);
+                        $('div.section-2 > .container:first > div.card-box:nth-child(' + (pagination + 1) + ')').show();
+                        console.log(pagination + 1);
+                    }
+                    $('#x').text((pagination + 1));
+
+                    summary_answer_resp.push(true);
+
+                } else {
+                    /* Show Summary */
+                    $('#next').prop('disabled', true);
+                    loadSummaryView();
+                }
+            }
+
+        }
+        if ((pagination + 1) >= limit) {
+            loadSummaryView();
         }
     } else {
         pagination++;
         var limit = $('#y').text();
         console.log(`${pagination} < ${limit}`);
+        row[pagination] = 'question' + pagination;
 
         if (pagination < limit) {
+
             $('#next').prop('disabled', false);
             $('#back').prop('disabled', false);
 
@@ -560,14 +643,13 @@ $(document).on('click', '#next', function () {
             /* Show Summary */
             $('#next').prop('disabled', true);
         }
+        if (pagination >= limit) {
+            loadSummaryView();
+        }
     }
-
-
-
-
 });
 
-$(document).on('click', '#back', function () {
+$(document).on('click', '#back', function() {
     console.log(`${pagination} <= 1`)
     if (pagination < 1) {
         $('#back').prop('disabled', true);
@@ -619,7 +701,7 @@ var modal_section = `<div class="modal fade" id="exampleModalCenter" tabindex="-
     </div>`;
 
 var head_section1 = `<div class="card-box card-bg card-border">
-                            <h4 id="section1-training-title">My Training tilte</h4>
+                            <h4 id="section1-training-title">My Training title</h4>
                             <p class="mb0" id="section1-training-description">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type
                                 specimen book.</p>
                         </div>`;
@@ -627,7 +709,7 @@ var head_section1 = `<div class="card-box card-bg card-border">
 var text_section1 = `<div class="card-box card-bg card-border">
                         <div class="form-group">
                             <div class="hover-btn ">
-                                <label><strong><span class="counter">1</span>. <span class="training-type">Text</span></strong> </label>
+                                <label><strong><span class="counter">1</span>. <span class="training-type">Text</span></strong> </label><span class="float-right result"></span>
                             </div>
                             <div class="clearfix"></div>
                             <hr>
@@ -639,7 +721,7 @@ var text_section1 = `<div class="card-box card-bg card-border">
 var question_section1 = `<div class="card-box card-bg card-border">
                             <div class="form-group">
                                 <div class="hover-btn ">
-                                    <label><strong><span class="counter">2</span>. <span class="question-title">Question with two option</span></strong> </label>
+                                    <label><strong><span class="counter">2</span>. <span class="question-title">Question with two option</span></strong> </label><span class="float-right result"></span>
                                     <button type="button" class="close remove-question" data-dismiss="alert">
                                         <span aria-hidden="true">
                                             
@@ -690,6 +772,18 @@ var footer_section2 = `<div class="footer section-2-footer">
                                         <div class="col-4"> <button type="button" class="btn btn-primary-outline btn-sm " id="back"> Back</button></div>
                                         <div class="col-4 text-center" id="xofy"> <span id="x">1</span> of <span id="y">4</span></div>
                                         <div class="col-4 text-right"> <button type="button" class="btn btn-primary btn-sm pull-right" id="next"> Next</button></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+
+var footer_section3 = `<div class="footer section-3-footer">
+                            <div class="footer-padd bt">
+                                <div class="container ">
+                                    <div class="row">
+                                    <div class="col-4"> </div>
+                                    <div class="col-2 text-center"> </div>
+                                    <div class="col-6 text-right"> <button type="button" class="btn btn-primary btn-sm pull-right submit-form" id="submit"> Complete Training</button></div>
                                     </div>
                                 </div>
                             </div>

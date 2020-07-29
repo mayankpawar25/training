@@ -2,8 +2,7 @@
     "view": {
         "type": "AdaptiveCard",
         "version": "1.0",
-        "body": [
-            {
+        "body": [{
                 "id": "Sender",
                 "type": "TextBlock",
                 "text": "${creator[0].displayName} sent a Training",
@@ -62,15 +61,13 @@
                 "id": "Questions",
                 "type": "Container",
                 "style": "emphasis",
-                "items": [
-                    {
-                        "type": "TextBlock",
-                        "text": "Questions: ${count(action.dataTables[0].dataColumns)}",
-                        "size": "medium",
-                        "wrap": true,
-                        "spacing": "medium"
-                    }
-                ]
+                "items": [{
+                    "type": "TextBlock",
+                    "text": "${count(action.dataTables[0].dataColumns)} training items",
+                    "size": "medium",
+                    "wrap": true,
+                    "spacing": "medium"
+                }]
             },
             {
                 "id": "Summary",
@@ -83,8 +80,7 @@
                 "spacing": "small"
             }
         ],
-        "actions": [
-            {
+        "actions": [{
                 "id": "RespondButton",
                 "$when": "${equals(action.status, 'Active')}",
                 "title": "Respond",
