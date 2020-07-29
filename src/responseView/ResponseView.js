@@ -19,7 +19,7 @@ async function getTheme(request) {
 
     $('div.section-1').append(`<div class="row"><div class="col-12"><div id="root"></div></div></div>`);
     $('div.section-1').after(modal_section);
-    $('div.section-1').after(footer_section);
+    // $('div.section-1').after(footer_section);
     $root = $("#root")
 
     setTimeout(() => {
@@ -75,7 +75,39 @@ function createBody() {
         $root.append($card);
     } else {
 
-        var $card = $('<div class=""></div>');
+        $('div.section-1').show();
+        $('div.section-1').append(head_section1);
+        $('#section1-training-title').html(actionInstance.displayName);
+        $('#section1-training-description').html(actionInstance.customProperties[0].value);
+
+        /* Create Text and Question summary */
+        actionInstance.dataTables.forEach((dataTable) => {
+            dataTable.dataColumns.forEach((data, ind) => {
+                if (data.valueType == 'LargeText') {
+                    /* Call Text Section 1 */
+                    var counter = $('div.card-box').length;
+                    var text_title = data.displayName.length > 100 ? data.displayName.substr(0, data.displayName.lastIndexOf(' ', 97)) + '...' : data.displayName;
+                    $('div.section-1').append(text_section1);
+                    $('div.card-box:last').find('span.counter').text(counter);
+                    $('div.card-box:last').find('.text-description').text(text_title);
+
+                } else if (data.valueType == 'SingleOption' || data.valueType == 'MultiOption') {
+                    /* Call Question Section 1 */
+                    var counter = $('div.card-box').length;
+                    var text_title = data.displayName.length > 100 ? data.displayName.substr(0, data.displayName.lastIndexOf(' ', 97)) + '...' : data.displayName;
+                    $('div.section-1').append(question_section1);
+                    $('div.card-box:last').find('span.counter').text(counter);
+                    $('div.card-box:last').find('.question-title').text(`Question with ${numbertowords(Object.keys(data.options).length)} options`);
+                    $('div.card-box:last').find('.question-title-main').text(text_title);
+                }
+            });
+        });
+
+
+        $('div.section-1').append(`<div class="container pb-100"></div>`);
+        $('div.section-1').after(footer_section1);
+
+        /* var $card = $('<div class=""></div>');
         var $title = $("<h4>" + actionInstance.displayName + "</h4>");
         var $hr = $("<hr>");
         var $description = $('<p class="">' + actionInstance.customProperties[0].value + '</p>');
@@ -84,14 +116,7 @@ function createBody() {
         $card.append($description);
         $root.append($card);
         createQuestionView();
-        $root.append($hr);
-
-        /* var $spDiv = $('<div class="col-sm-12"></div>');
-        var $sDiv = $('<div class="form-group"></div>');
-        var $submit = $('<button class="btn btn-primary btn-sm float-right submit-form" >Submit</button>'); // Create a <button> element
-        $sDiv.append($submit);
-        $spDiv.append($sDiv);
-        $root.append($spDiv); */
+        $root.append($hr); */
         return;
     }
 }
@@ -100,47 +125,60 @@ $(document).on('click', '.submit-form', function () {
     submitForm();
 })
 
-function createQuestionView() {
+function createQuestionView(index_num) {
     var count = 1;
     actionInstance.dataTables.forEach((dataTable) => {
         dataTable.dataColumns.forEach((question, ind) => {
-            var count = ind + 1;
-            var $card = $('<div class="card-box card-border card-bg"></div>');
-            var $questionHeading = $("<label><strong>" + count + ". " + question.displayName + "</strong></label>"); // Heading of For
-            $card.append($questionHeading);
-            var choice_occurance = 0;
-            /* Check multichoice or single choice options  */
-            if (question.valueType == "SingleOption") {
-                choice_occurance = 1;
-            } else {
-                choice_occurance = 2;
+
+            if (ind == index_num) {
+                var count = ind + 1;
+                var $card = $('<div class="card-box card-border card-bg"></div>');
+
+                var $questionHeading = `<div class="form-group">
+                    <div class="hover-btn ">
+                        <label><strong><span class="counter">${count}</span>. <span class="training-type">Question</span></strong> </label>
+                    </div>
+                    <div class="clearfix"></div>
+                    <hr>
+                </div>
+                <label><strong>${question.displayName}</strong></label>`;
+
+                $card.append($questionHeading);
+                var choice_occurance = 0;
+                /* Check multichoice or single choice options  */
+                if (question.valueType == "SingleOption") {
+                    choice_occurance = 1;
+                } else {
+                    choice_occurance = 2;
+                }
+
+                console.log("choice occurance" + choice_occurance);
+                console.log("question" + question.valueType);
+
+                //add radio button
+                if (choice_occurance > 1) {
+                    question.options.forEach((option) => {
+                        var $radioOption = getCheckboxButton(
+                            option.displayName,
+                            question.name,
+                            option.name
+                        );
+                        $card.append($radioOption);
+                    });
+                } else {
+                    //add checkbox button
+                    question.options.forEach((option) => {
+                        var $radioOption = getRadioButton(
+                            option.displayName,
+                            question.name,
+                            option.name
+                        );
+                        $card.append($radioOption);
+                    });
+                }
+                $('div.section-2 > .container:first').append($card);
             }
 
-            console.log("choice occurance" + choice_occurance);
-            console.log("question" + question.valueType);
-
-            //add radio button
-            if (choice_occurance > 1) {
-                question.options.forEach((option) => {
-                    var $radioOption = getCheckboxButton(
-                        option.displayName,
-                        question.name,
-                        option.name
-                    );
-                    $card.append($radioOption);
-                });
-            } else {
-                //add checkbox button
-                question.options.forEach((option) => {
-                    var $radioOption = getRadioButton(
-                        option.displayName,
-                        question.name,
-                        option.name
-                    );
-                    $card.append($radioOption);
-                });
-            }
-            $root.append($card);
         });
 
         count++;
@@ -168,6 +206,43 @@ $(document).on('click', 'div.radio-section', function () {
     radiobuttonclick($(this).id, $(this).attr('columnId'));
 })
 
+
+function numbertowords(num) {
+    switch (num) {
+        case 1:
+            return "one";
+            break;
+        case 2:
+            return "two";
+            break;
+        case 3:
+            return "three";
+            break;
+        case 4:
+            return "four";
+            break;
+        case 5:
+            return "five";
+            break;
+        case 6:
+            return "six";
+            break;
+        case 7:
+            return "seven";
+            break;
+        case 8:
+            return "eight";
+            break;
+        case 9:
+            return "nine";
+            break;
+        case 10:
+            return "ten";
+            break;
+        default:
+            break;
+    }
+}
 
 // *********************************************** HTML ELEMENT END***********************************************
 
@@ -261,6 +336,8 @@ function radiobuttonclick(questionResponse, colomnId) {
 
         if (!row[col]) row[col] = [];
         row[col] = JSON.stringify(data);
+
+        $('#next').prop('disabled', false);
     });
 
     $.each($("input[type='radio']:checked"), function () {
@@ -268,9 +345,13 @@ function radiobuttonclick(questionResponse, colomnId) {
 
         if (!row[col]) row[col] = [];
         row[col] = $(this).attr("id");
+
+        $('#next').prop('disabled', false);
+
     });
 
-    console.log(row);
+
+    // console.log(row);
 }
 
 function generateGUID() {
@@ -312,7 +393,196 @@ function addDataRows(actionId) {
         });
 }
 
+function createTrainingSection(index_num) {
+    /* Create Text and Question summary */
+    actionInstance.dataTables.forEach((dataTable, index) => {
+        if (index == 0) {
+            var y = Object.keys(dataTable.dataColumns).length;
+            $('#y').text(y);
+
+            dataTable.dataColumns.forEach((data, ind) => {
+                if (ind == index_num) {
+                    var x = ind + 1;
+                    $('#x').text(x);
+
+                    if (data.valueType == 'LargeText') {
+                        /* Call Text Section 1 */
+                        $('div.section-2 > .container:first').append(text_section2);
+                        var counter = $('div.section-2 .container > div.card-box').length;
+                        var text_title = data.displayName;
+                        $('div.section-2 > .container:first > div.card-box:last').find('span.counter').text(counter);
+                        $('div.section-2 > .container:first > div.card-box:last').find('.text-description').text(text_title);
+                        console.log(`counter tet ${counter}`);
+
+                    } else if (data.valueType == 'SingleOption' || data.valueType == 'MultiOption') {
+                        createQuestionView(index_num);
+                        var counter = $('div.section-2 .container > div.card-box').length;
+                        $('div.section-2 > .container:first > div.card-box:last').find('span.counter').text(counter);
+                        console.log(`counter  ${counter}`);
+                    }
+                }
+            });
+        }
+    });
+}
+
 // *********************************************** SUBMIT ACTION END***********************************************
+// *********************************************** OTHER ACTION STARTS***********************************************
+let pagination = 0;
+$(document).on('click', '#start', function () {
+    $('div.section-1').hide();
+    $('div.section-1-footer').hide();
+    $('div.section-1').after(`<div class="section-2"><div class="container pt-4"></div></div>`);
+
+    /* Show first section */
+    // $('div.section-2 .container').html(text_section2);
+    $('div.section-2').after(footer_section2);
+    $('div.section-2').append(`<div class="container pb-100"></div>`);
+
+    createTrainingSection(pagination);
+    $('#back').prop('disabled', true);
+
+    console.log(pagination);
+
+});
+
+$(document).on('click', '#next', function () {
+
+    /* Validate */
+    if ($('div.card-box:visible').find('.training-type').text() == 'Question') {
+        /* Question Validations */
+        var selected_answer = [];
+        var check_counter = 0;
+        var correct_answer = false;
+        var attr_name = '';
+        $('div.card-box:visible').find("input").each(function (ind, ele) {
+            if ($(ele).is(':checked')) {
+                check_counter++;
+                selected_answer.push($.trim($('div.card-box:visible').find("input:checked").parent('label').text()));
+                attr_name = $(ele).attr('name');
+            }
+        })
+
+        if (check_counter <= 0) {
+            $('#next').prop('disabled', true);
+        } else {
+            $('#next').prop('disabled', false);
+        }
+
+        console.log(`selected_answer ${selected_answer}`);
+        /* Validate if show answer is Yes */
+        var answerKeys = JSON.parse(actionInstance.customProperties[4].value);
+        var correct_ans_arr = [];
+
+        $.each(selected_answer, function (i, selected_subarray) {
+            if ($.inArray(selected_subarray, answerKeys[(attr_name - 1)]) !== -1) {
+                correct_answer = true;
+            }
+        });
+
+        answerKeys[(attr_name - 1)].forEach(function (subarr) {
+            correct_ans_arr.push($.trim($('#' + subarr).parent('label').text()));
+        });
+
+
+
+        var correct_value = correct_ans_arr.join();
+
+        if (correct_answer == true) {
+            $('#exampleModalCenter').find('#exampleModalLongTitle').html('<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" class="gt gs mt--4"><g><g><g><path d="M507.113,428.415L287.215,47.541c-6.515-11.285-18.184-18.022-31.215-18.022c-13.031,0-24.7,6.737-31.215,18.022L4.887,428.415c-6.516,11.285-6.516,24.76,0,36.044c6.515,11.285,18.184,18.022,31.215,18.022h439.796c13.031,0,24.7-6.737,31.215-18.022C513.629,453.175,513.629,439.7,507.113,428.415z M481.101,449.441c-0.647,1.122-2.186,3.004-5.202,3.004H36.102c-3.018,0-4.556-1.881-5.202-3.004c-0.647-1.121-1.509-3.394,0-6.007L250.797,62.559c1.509-2.613,3.907-3.004,5.202-3.004c1.296,0,3.694,0.39,5.202,3.004L481.1,443.434C482.61,446.047,481.748,448.32,481.101,449.441z"/><rect x="240.987" y="166.095" width="30.037" height="160.197" /><circle cx="256.005" cy="376.354" r="20.025" /></g></g></g > <g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg > Answer response!');
+            $('#exampleModalCenter').find('.modal-body').html(`<label><strong>Correct</strong></label><p><label>Your Answer</label><br>${correct_value}</p>`);
+            $('#exampleModalCenter').find('.modal-footer').html('<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Continue</button>');
+            $('#exampleModalCenter').find('#save-changes').hide();
+            $('#exampleModalCenter').modal('show');
+
+            $("#exampleModalCenter").on("hidden.bs.modal", function () {
+                // put your default event here
+                // addDataRows(response.context.actionId);
+
+                pagination++;
+                var limit = $('#y').text();
+                console.log(`${pagination} < ${limit}`);
+
+                if (pagination < limit) {
+                    $('#next').prop('disabled', false);
+                    $('#back').prop('disabled', false);
+
+                    $('div.section-2 > .container:first > div.card-box:nth-child(' + pagination + ')').hide();
+                    console.log(`next section ${$('div.section-2 > .container:first > div.card-box').length} <= ${pagination}`)
+                    if ($('div.section-2 > .container:first > div.card-box').length <= pagination) {
+                        createTrainingSection(pagination);
+                    } else {
+                        console.log(pagination);
+                        $('div.section-2 > .container:first > div.card-box:nth-child(' + (pagination + 1) + ')').show();
+                        console.log(pagination + 1);
+                    }
+                    $('#x').text((pagination + 1));
+                } else {
+                    /* Show Summary */
+                    $('#next').prop('disabled', true);
+                }
+            });
+
+        } else {
+            $('#exampleModalCenter').find('#exampleModalLongTitle').html('<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" class="gt gs mt--4"><g><g><g><path d="M507.113,428.415L287.215,47.541c-6.515-11.285-18.184-18.022-31.215-18.022c-13.031,0-24.7,6.737-31.215,18.022L4.887,428.415c-6.516,11.285-6.516,24.76,0,36.044c6.515,11.285,18.184,18.022,31.215,18.022h439.796c13.031,0,24.7-6.737,31.215-18.022C513.629,453.175,513.629,439.7,507.113,428.415z M481.101,449.441c-0.647,1.122-2.186,3.004-5.202,3.004H36.102c-3.018,0-4.556-1.881-5.202-3.004c-0.647-1.121-1.509-3.394,0-6.007L250.797,62.559c1.509-2.613,3.907-3.004,5.202-3.004c1.296,0,3.694,0.39,5.202,3.004L481.1,443.434C482.61,446.047,481.748,448.32,481.101,449.441z"/><rect x="240.987" y="166.095" width="30.037" height="160.197" /><circle cx="256.005" cy="376.354" r="20.025" /></g></g></g > <g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg > Answer response!');
+            $('#exampleModalCenter').find('.modal-body').html(`<label><strong>Incorrect</strong></label><p><label>Correct Answer</label><br>${correct_value}</p>`);
+            $('#exampleModalCenter').find('.modal-footer').html('<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Continue</button>');
+            $('#exampleModalCenter').find('#save-changes').hide();
+            $('#exampleModalCenter').modal('show');
+
+            $("#exampleModalCenter").on("hidden.bs.modal", function () {
+                // put your default event here
+                $('div.card-box:visible').find("input").each(function (ind, ele) {
+                    $(ele).prop('disabled', true);
+                });
+            });
+        }
+    } else {
+        pagination++;
+        var limit = $('#y').text();
+        console.log(`${pagination} < ${limit}`);
+
+        if (pagination < limit) {
+            $('#next').prop('disabled', false);
+            $('#back').prop('disabled', false);
+
+            $('div.section-2 > .container:first > div.card-box:nth-child(' + pagination + ')').hide();
+            console.log(`next section ${$('div.section-2 > .container:first > div.card-box').length} <= ${pagination}`)
+            if ($('div.section-2 > .container:first > div.card-box').length <= pagination) {
+                createTrainingSection(pagination);
+            } else {
+                console.log(pagination);
+                $('div.section-2 > .container:first > div.card-box:nth-child(' + (pagination + 1) + ')').show();
+                console.log(pagination + 1);
+            }
+            $('#x').text((pagination + 1));
+        } else {
+            /* Show Summary */
+            $('#next').prop('disabled', true);
+        }
+    }
+
+
+
+
+});
+
+$(document).on('click', '#back', function () {
+    console.log(`${pagination} <= 1`)
+    if (pagination < 1) {
+        $('#back').prop('disabled', true);
+    } else {
+        $('#back').prop('disabled', false);
+        $('#next').prop('disabled', false);
+
+        $('div.section-2 > .container:first > div.card-box:nth-child(' + (pagination + 1) + ')').hide();
+        $('div.section-2 > .container:first > div.card-box:nth-child(' + pagination + ')').show();
+
+        $('#x').text(pagination);
+        pagination--;
+    }
+});
+// *********************************************** OTHER ACTION END***********************************************
 
 var footer_section = `<div class="footer" style="display:none;">
         <div class="footer-padd bt">
@@ -347,3 +617,80 @@ var modal_section = `<div class="modal fade" id="exampleModalCenter" tabindex="-
             </div>
         </div>
     </div>`;
+
+var head_section1 = `<div class="card-box card-bg card-border">
+                            <h4 id="section1-training-title">My Training tilte</h4>
+                            <p class="mb0" id="section1-training-description">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type
+                                specimen book.</p>
+                        </div>`;
+
+var text_section1 = `<div class="card-box card-bg card-border">
+                        <div class="form-group">
+                            <div class="hover-btn ">
+                                <label><strong><span class="counter">1</span>. <span class="training-type">Text</span></strong> </label>
+                            </div>
+                            <div class="clearfix"></div>
+                            <hr>
+                        </div>
+                        <p class="mb0 text-description">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type
+                            specimen book.</p>
+                    </div>`;
+
+var question_section1 = `<div class="card-box card-bg card-border">
+                            <div class="form-group">
+                                <div class="hover-btn ">
+                                    <label><strong><span class="counter">2</span>. <span class="question-title">Question with two option</span></strong> </label>
+                                    <button type="button" class="close remove-question" data-dismiss="alert">
+                                        <span aria-hidden="true">
+                                            
+                                        </span>
+                                        <span class="sr-only">Close</span>
+                                    </button>
+                                </div>
+                                <div class="clearfix"></div>
+                                <hr>
+                            </div>
+                            <label><strong><span class="question-title-main">My new Question</span></strong></label>
+                        </div>`;
+
+var footer_section1 = `<div class="footer section-1-footer">
+                            <div class="footer-padd bt">
+                                <div class="container ">
+                                    <div class="row">
+                                        <div class="col-4"> </div>
+                                        <div class="col-4 text-center"> </div>
+                                        <div class="col-4 text-right"> <button type="button" class="btn btn-primary btn-sm pull-right" id="start"> Start</button></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+
+var text_section2 = `<div class="card-box card-bg card-border">
+                        <div class="form-group">
+                            <div class="hover-btn ">
+                                <label><strong><span class="counter">1</span>. Text</strong> </label>
+                                <button type="button" class="close remove-question" data-dismiss="alert">
+                                    <span aria-hidden="true">
+                                        
+                                    </span>
+                                    <span class="sr-only">Close</span>
+                                </button>
+                            </div>
+                            <div class="clearfix"></div>
+                            <hr>
+                        </div>
+                        <p class="mb0 text-description">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type
+                            specimen book.</p>
+                    </div>`;
+var question_section2 = ``;
+var footer_section2 = `<div class="footer section-2-footer">
+                            <div class="footer-padd bt">
+                                <div class="container ">
+                                    <div class="row">
+                                        <div class="col-4"> <button type="button" class="btn btn-primary-outline btn-sm " id="back"> Back</button></div>
+                                        <div class="col-4 text-center" id="xofy"> <span id="x">1</span> of <span id="y">4</span></div>
+                                        <div class="col-4 text-right"> <button type="button" class="btn btn-primary btn-sm pull-right" id="next"> Next</button></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
