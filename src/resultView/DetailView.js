@@ -1,6 +1,6 @@
 import * as actionSDK from "action-sdk-sunny";
 
-$(document).ready(function() {
+$(document).ready(function () {
     OnPageLoad();
 });
 
@@ -36,12 +36,12 @@ var root = document.getElementById("root");
 function OnPageLoad() {
     actionSDK
         .executeApi(new actionSDK.GetContext.Request())
-        .then(function(response) {
+        .then(function (response) {
             console.info("GetContext - Response: " + JSON.stringify(response));
             actionContext = response.context;
             getDataRows(response.context.actionId);
         })
-        .catch(function(error) {
+        .catch(function (error) {
             console.error("GetContext - Error: " + JSON.stringify(error));
         });
 }
@@ -61,7 +61,7 @@ function getDataRows(actionId) {
 
     actionSDK
         .executeBatchApi(batchRequest)
-        .then(function(batchResponse) {
+        .then(function (batchResponse) {
             console.info("BatchResponse: " + JSON.stringify(batchResponse));
             actionInstance = batchResponse.responses[0].action;
             actionSummary = batchResponse.responses[1].summary;
@@ -69,9 +69,9 @@ function getDataRows(actionId) {
             actionDataRowsLength = actionDataRows == null ? 0 : actionDataRows.length;
             createBody();
         })
-        .catch(function(error) {
+        /* .catch(function (error) {
             console.log("Console log: Error: " + JSON.stringify(error));
-        });
+        }) */;
 }
 
 async function createBody() {
@@ -102,7 +102,7 @@ async function createBody() {
     $pcard.append(
         "<label><strong>Participation " +
         participationPercentage +
-        '% </strong></label><div class="progress"><div class="progress-bar bg-primary" role="progressbar" style="width: ' +
+        '% </strong></label><div class="progress mb-2"><div class="progress-bar bg-primary" role="progressbar" style="width: ' +
         participationPercentage +
         '%" aria-valuenow="' +
         participationPercentage +
@@ -245,7 +245,7 @@ function getNonresponders() {
     }
 }
 
-$(document).on("click", ".getresult", function() {
+$(document).on("click", ".getresult", function () {
     var userId = $(this).attr("id");
     console.log(userId);
 
@@ -280,18 +280,20 @@ function createReponderQuestionView(userId) {
             $rowdDiv.append($qDiv);
 
             var count = ind + 1;
-            var $questionHeading = $("<label></label>");
+            var $dflex = $("<div class='d-flex'></div>");
+            var $questionHeading = $('<label></label>');
             console.log("question: " + JSON.stringify(question));
 
             $questionHeading.append(
                 "<strong>" + count + ". " + question.displayName + "</strong>"
             );
 
-            $cardDiv.append($questionHeading);
+            $dflex.append($questionHeading);
 
-            $cardDiv.append(
-                '<label class="float-right" id="status-' + question.name + '"></label>'
-            );
+            $dflex.append('<label class="float-right" id="status-' + question.name + '"></label>')
+
+            $cardDiv.append($dflex);
+
 
             question.options.forEach((option) => {
                 /* User Responded */
@@ -371,7 +373,7 @@ function createReponderQuestionView(userId) {
 
                 // console.log("name: " + "#status-" + question.name);
                 // console.log("answer_is: " + JSON.stringify(answer_is));
-                $cardDiv.find("#status-" + question.name).text(answer_is);
+                $cardDiv.find("#status-" + question.name).html(`<span class="${answer_is == 'Correct' ? 'text-success' : 'text-danger'}">${answer_is}</span>`);
             });
             if (answer_is == "Correct") {
                 score++;
@@ -494,7 +496,7 @@ function createQuestionView(userId) {
                 );
                 console.log($radioOption);
                 $cardDiv.append($radioOption);
-                $cardDiv.find("#status-" + question.name).text(answer_is);
+                $cardDiv.find("#status-" + question.name).html(`<span class="${answer_is == 'Correct' ? 'text-success' : 'text-danger'}">${answer_is}</span>`);
             });
 
             if (answer_is == "Correct") {
@@ -577,16 +579,16 @@ function footer1() {
     );
 }
 
-$(document).on("click", ".back", function() {
+$(document).on("click", ".back", function () {
     createBody();
 });
 
-$(document).on("click", ".back1", function() {
+$(document).on("click", ".back1", function () {
     var userId = $(this).attr("userid-data");
     create_responder_nonresponders();
 });
 
-$(document).on("click", "#show-responders", function() {
+$(document).on("click", "#show-responders", function () {
     create_responder_nonresponders();
 });
 

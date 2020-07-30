@@ -33,7 +33,7 @@ async function getTheme(request) {
 }
 
 // *********************************************** HTML ELEMENT***********************************************
-$(document).ready(function() {
+$(document).ready(function () {
     let request = new actionSDK.GetContext.Request();
     getTheme(request);
 });
@@ -41,11 +41,11 @@ $(document).ready(function() {
 function OnPageLoad() {
     actionSDK
         .executeApi(new actionSDK.GetContext.Request())
-        .then(function(response) {
+        .then(function (response) {
             console.info("GetContext - Response: " + JSON.stringify(response));
             getActionInstance(response.context.actionId);
         })
-        .catch(function(error) {
+        .catch(function (error) {
             console.error("GetContext - Error: " + JSON.stringify(error));
         });
 }
@@ -53,12 +53,12 @@ function OnPageLoad() {
 function getActionInstance(actionId) {
     actionSDK
         .executeApi(new actionSDK.GetAction.Request(actionId))
-        .then(function(response) {
+        .then(function (response) {
             console.info("Response: " + JSON.stringify(response));
             actionInstance = response.action;
             createBody();
         })
-        .catch(function(error) {
+        .catch(function (error) {
             console.log("Error: " + JSON.stringify(error));
         });
 }
@@ -122,7 +122,7 @@ function createBody() {
     }
 }
 
-$(document).on('click', '.submit-form', function() {
+$(document).on('click', '.submit-form', function () {
     submitForm();
 })
 
@@ -249,37 +249,41 @@ function loadSummaryView() {
     console.log('call');
     $('div.section-2').hide();
     $('div.section-2-footer').hide();
-    $('div.section-2').after(`<div class="section-3"><div class="container pt-4"><label><strong>Training Summary</strong></label></div><div class="container pb-100"></div></div>`);
 
-    $('div.section-3 .container:first').append(head_section1);
-    $('div.section-3 .container:first').after(footer_section3);
-    $('div.section-3 #section1-training-title').html(actionInstance.displayName);
-    $('div.section-3 #section1-training-description').html(actionInstance.customProperties[0].value);
+    if ($('.section-3').length <= 0) {
+        $('div.section-2').after(`<div class="section-3"><div class="container pt-4"><label><strong>Training Summary</strong></label></div><div class="container pb-100"></div></div>`);
 
-    /* Create Text and Question summary */
-    actionInstance.dataTables.forEach((dataTable) => {
-        dataTable.dataColumns.forEach((data, ind) => {
-            if (data.valueType == 'LargeText') {
-                /* Call Text Section 1 */
-                var counter = $('.section-3 div.card-box').length;
-                var text_title = data.displayName.length > 100 ? data.displayName.substr(0, data.displayName.lastIndexOf(' ', 97)) + '...' : data.displayName;
-                $('div.section-3 .container:first').append(text_section1);
-                $('div.card-box:last').find('span.counter').text(counter);
-                $('div.card-box:last').find('.text-description').text(text_title);
-            } else if (data.valueType == 'SingleOption' || data.valueType == 'MultiOption') {
-                /* Call Question Section 1 */
-                var counter = $('.section-3 div.card-box').length;
-                var text_title = data.displayName.length > 100 ? data.displayName.substr(0, data.displayName.lastIndexOf(' ', 97)) + '...' : data.displayName;
-                $('div.section-3 .container:first').append(question_section1);
-                $('div.card-box:last').find('span.counter').text(counter);
-                $('div.card-box:last').find('.question-title').text(`Question with ${numbertowords(Object.keys(data.options).length)} options`);
-                $('div.card-box:last').find('.question-title-main').text(text_title);
-                if (actionInstance.customProperties[3].value == 'Yes') {
-                    $('div.card-box:last').find('.result').text(summary_answer_resp[ind] == true ? 'Correct' : 'Incorrect');
+        $('div.section-3 .container:first').append(head_section1);
+        $('div.section-3 .container:first').after(footer_section3);
+        $('div.section-3 #section1-training-title').html(actionInstance.displayName);
+        $('div.section-3 #section1-training-description').html(actionInstance.customProperties[0].value);
+
+        /* Create Text and Question summary */
+        actionInstance.dataTables.forEach((dataTable) => {
+            dataTable.dataColumns.forEach((data, ind) => {
+                if (data.valueType == 'LargeText') {
+                    /* Call Text Section 1 */
+                    var counter = $('.section-3 div.card-box').length;
+                    var text_title = data.displayName.length > 100 ? data.displayName.substr(0, data.displayName.lastIndexOf(' ', 97)) + '...' : data.displayName;
+                    $('div.section-3 .container:first').append(text_section1);
+                    $('div.card-box:last').find('span.counter').text(counter);
+                    $('div.card-box:last').find('.text-description').text(text_title);
+                } else if (data.valueType == 'SingleOption' || data.valueType == 'MultiOption') {
+                    /* Call Question Section 1 */
+                    var counter = $('.section-3 div.card-box').length;
+                    var text_title = data.displayName.length > 100 ? data.displayName.substr(0, data.displayName.lastIndexOf(' ', 97)) + '...' : data.displayName;
+                    $('div.section-3 .container:first').append(question_section1);
+                    $('div.card-box:last').find('span.counter').text(counter);
+                    $('div.card-box:last').find('.question-title').text(`Question with ${numbertowords(Object.keys(data.options).length)} options`);
+                    $('div.card-box:last').find('.question-title-main').text(text_title);
+                    if (actionInstance.customProperties[3].value == 'Yes') {
+                        $('div.card-box:last').find('.result').html(summary_answer_resp[ind] == true ? `<span class="float-right result text-success"><i class="fa fa-check" aria-hidden="true"></i> Correct</span>` : `<span class="float-right result text-danger"><i class="fa fa-remove" aria-hidden="true"></i> Incorrect</span>`);
+                    }
                 }
-            }
+            });
         });
-    });
+    }
+
     console.log(`summary_answer_resp ${summary_answer_resp}`);
 }
 
@@ -291,11 +295,11 @@ function loadSummaryView() {
 function submitForm() {
     actionSDK
         .executeApi(new actionSDK.GetContext.Request())
-        .then(function(response) {
+        .then(function (response) {
             console.info("GetContext - Response: " + JSON.stringify(response));
             addDataRows(response.context.actionId);
         })
-        .catch(function(error) {
+        .catch(function (error) {
             console.error("GetContext - Error: " + JSON.stringify(error));
         });
 }
@@ -328,7 +332,7 @@ function submitForm() {
 } */
 
 function generateGUID() {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
         var r = (Math.random() * 16) | 0,
             v = c == "x" ? r : (r & 0x3) | 0x8;
         return v.toString(16);
@@ -358,10 +362,10 @@ function addDataRows(actionId) {
     ]);
     actionSDK
         .executeBatchApi(batchRequest)
-        .then(function(batchResponse) {
+        .then(function (batchResponse) {
             console.info("BatchResponse: " + JSON.stringify(batchResponse));
         })
-        .catch(function(error) {
+        .catch(function (error) {
             console.error("Error: " + JSON.stringify(error));
         });
 }
@@ -402,7 +406,7 @@ function createTrainingSection(index_num) {
 // *********************************************** SUBMIT ACTION END***********************************************
 // *********************************************** OTHER ACTION STARTS***********************************************
 let pagination = 0;
-$(document).on('click', '#start', function() {
+$(document).on('click', '#start', function () {
     $('div.section-1').hide();
     $('div.section-1-footer').hide();
     $('div.section-1').after(`<div class="section-2"><div class="container pt-4"></div></div>`);
@@ -419,7 +423,7 @@ $(document).on('click', '#start', function() {
 
 });
 
-$(document).on('click', '#next', function() {
+$(document).on('click', '#next', function () {
     var data = [];
 
     /* Validate */
@@ -429,19 +433,24 @@ $(document).on('click', '#next', function() {
         var check_counter = 0;
         var correct_answer = false;
         var attr_name = '';
-        $('div.card-box:visible').find("input[type='checkbox']:checked").each(function(ind, ele) {
+
+        var is_checked = false;
+
+        $('div.card-box:visible').find("input[type='checkbox']:checked").each(function (ind, ele) {
             if ($(ele).is(':checked')) {
                 check_counter++;
                 // selected_answer.push($.trim($(ele).parent('label').text()));
                 selected_answer.push($.trim($(ele).attr('id')));
                 attr_name = $(ele).attr('name');
                 data.push($(this).attr("id"));
+
+                is_checked = true;
             }
         });
         if (!row[(pagination + 1)]) row[(pagination + 1)] = [];
         row[(pagination + 1)] = JSON.stringify(data);
 
-        $('div.card-box:visible').find("input[type='radio']:checked").each(function(ind, ele) {
+        $('div.card-box:visible').find("input[type='radio']:checked").each(function (ind, ele) {
             if ($(ele).is(':checked')) {
                 check_counter++;
                 selected_answer.push($.trim($(ele).attr('id')));
@@ -449,6 +458,8 @@ $(document).on('click', '#next', function() {
 
                 if (!row[(pagination + 1)]) row[(pagination + 1)] = [];
                 row[(pagination + 1)] = $(this).attr("id");
+
+                is_checked = true;
             }
         });
 
@@ -462,11 +473,7 @@ $(document).on('click', '#next', function() {
         var answerKeys = JSON.parse(actionInstance.customProperties[4].value);
         var correct_ans_arr = [];
 
-        console.log(`selected_answer:`)
-        console.log(selected_answer)
-        console.log(answerKeys)
-        console.log(attr_name)
-        $.each(selected_answer, function(i, selected_subarray) {
+        $.each(selected_answer, function (i, selected_subarray) {
             console.log(answerKeys.toString());
             if ($.inArray(selected_subarray, answerKeys[(attr_name - 1)]) !== -1) {
                 correct_answer = true;
@@ -477,30 +484,54 @@ $(document).on('click', '#next', function() {
 
         /* console.log(attr_name - 1);
         console.log(answerKeys[(attr_name - 1)].toString()); */
-        $.each(answerKeys[(attr_name - 1)], function(ii, subarr) {
+        $.each(answerKeys[(attr_name - 1)], function (ii, subarr) {
             correct_ans_arr.push($.trim($('#' + subarr).text()));
         });
 
 
 
         var correct_value = correct_ans_arr.join();
-        pagination++;
+        if (is_checked == true) {
+            pagination++;
+            if (correct_answer == true) {
+                if (actionInstance.customProperties[3].value == 'Yes' && $('div.card-box:visible').find("input").attr('disabled') !== "disabled") {
+                    $('#exampleModalCenter').find('#exampleModalLongTitle').html('<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" class="gt gs mt--4"><g><g><g><path d="M507.113,428.415L287.215,47.541c-6.515-11.285-18.184-18.022-31.215-18.022c-13.031,0-24.7,6.737-31.215,18.022L4.887,428.415c-6.516,11.285-6.516,24.76,0,36.044c6.515,11.285,18.184,18.022,31.215,18.022h439.796c13.031,0,24.7-6.737,31.215-18.022C513.629,453.175,513.629,439.7,507.113,428.415z M481.101,449.441c-0.647,1.122-2.186,3.004-5.202,3.004H36.102c-3.018,0-4.556-1.881-5.202-3.004c-0.647-1.121-1.509-3.394,0-6.007L250.797,62.559c1.509-2.613,3.907-3.004,5.202-3.004c1.296,0,3.694,0.39,5.202,3.004L481.1,443.434C482.61,446.047,481.748,448.32,481.101,449.441z"/><rect x="240.987" y="166.095" width="30.037" height="160.197" /><circle cx="256.005" cy="376.354" r="20.025" /></g></g></g > <g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg > Answer response!');
+                    $('#exampleModalCenter').find('.modal-body').html(`<label class="text-success"><i class="fa fa-check" aria-hidden="true"></i> <strong>Correct</strong></label><p><label>Your Answer</label><br>${correct_value}</p>`);
+                    $('#exampleModalCenter').find('.modal-footer').html('<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Continue</button>');
+                    $('#exampleModalCenter').find('#save-changes').hide();
+                    $('#exampleModalCenter').modal('show');
 
-        if (correct_answer == true) {
-            if (actionInstance.customProperties[3].value == 'Yes' && $('div.card-box:visible').find("input").attr('disabled') !== "disabled") {
-                $('#exampleModalCenter').find('#exampleModalLongTitle').html('<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" class="gt gs mt--4"><g><g><g><path d="M507.113,428.415L287.215,47.541c-6.515-11.285-18.184-18.022-31.215-18.022c-13.031,0-24.7,6.737-31.215,18.022L4.887,428.415c-6.516,11.285-6.516,24.76,0,36.044c6.515,11.285,18.184,18.022,31.215,18.022h439.796c13.031,0,24.7-6.737,31.215-18.022C513.629,453.175,513.629,439.7,507.113,428.415z M481.101,449.441c-0.647,1.122-2.186,3.004-5.202,3.004H36.102c-3.018,0-4.556-1.881-5.202-3.004c-0.647-1.121-1.509-3.394,0-6.007L250.797,62.559c1.509-2.613,3.907-3.004,5.202-3.004c1.296,0,3.694,0.39,5.202,3.004L481.1,443.434C482.61,446.047,481.748,448.32,481.101,449.441z"/><rect x="240.987" y="166.095" width="30.037" height="160.197" /><circle cx="256.005" cy="376.354" r="20.025" /></g></g></g > <g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg > Answer response!');
-                $('#exampleModalCenter').find('.modal-body').html(`<label><strong>Correct</strong></label><p><label>Your Answer</label><br>${correct_value}</p>`);
-                $('#exampleModalCenter').find('.modal-footer').html('<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Continue</button>');
-                $('#exampleModalCenter').find('#save-changes').hide();
-                $('#exampleModalCenter').modal('show');
+                    $("#exampleModalCenter").on("hidden.bs.modal", function () {
+                        // put your default event here
+                        // addDataRows(response.context.actionId);
+                        $('div.card-box:visible').find("input").each(function (ind, ele) {
+                            $(ele).prop('disabled', true);
+                        });
 
-                $("#exampleModalCenter").on("hidden.bs.modal", function() {
-                    // put your default event here
-                    // addDataRows(response.context.actionId);
-                    $('div.card-box:visible').find("input").each(function(ind, ele) {
-                        $(ele).prop('disabled', true);
+                        var limit = $('#y').text();
+                        console.log(`${pagination} < ${limit}`);
+
+                        if (pagination < limit) {
+                            $('#next').prop('disabled', false);
+                            $('#back').prop('disabled', false);
+
+                            $('div.section-2 > .container:first > div.card-box:nth-child(' + pagination + ')').hide();
+                            console.log(`next section ${$('div.section-2 > .container:first > div.card-box').length} <= ${pagination}`)
+                            if ($('div.section-2 > .container:first > div.card-box').length <= pagination) {
+                                createTrainingSection(pagination);
+                            } else {
+                                console.log(pagination);
+                                $('div.section-2 > .container:first > div.card-box:nth-child(' + (pagination + 1) + ')').show();
+                                console.log(pagination + 1);
+                            }
+                            $('#x').text((pagination + 1));
+
+                        } else {
+                            /* Show Summary */
+                            // $('#next').prop('disabled', true);
+                        }
                     });
-
+                } else {
                     var limit = $('#y').text();
                     console.log(`${pagination} < ${limit}`);
 
@@ -518,49 +549,51 @@ $(document).on('click', '#next', function() {
                             console.log(pagination + 1);
                         }
                         $('#x').text((pagination + 1));
-
                     } else {
                         /* Show Summary */
                         $('#next').prop('disabled', true);
                     }
-                });
-            } else {
-                var limit = $('#y').text();
-                console.log(`${pagination} < ${limit}`);
-
-                if (pagination < limit) {
-                    $('#next').prop('disabled', false);
-                    $('#back').prop('disabled', false);
-
-                    $('div.section-2 > .container:first > div.card-box:nth-child(' + pagination + ')').hide();
-                    console.log(`next section ${$('div.section-2 > .container:first > div.card-box').length} <= ${pagination}`)
-                    if ($('div.section-2 > .container:first > div.card-box').length <= pagination) {
-                        createTrainingSection(pagination);
-                    } else {
-                        console.log(pagination);
-                        $('div.section-2 > .container:first > div.card-box:nth-child(' + (pagination + 1) + ')').show();
-                        console.log(pagination + 1);
-                    }
-                    $('#x').text((pagination + 1));
-                } else {
-                    /* Show Summary */
-                    $('#next').prop('disabled', true);
                 }
-            }
-        } else {
-            if (actionInstance.customProperties[3].value == 'Yes' && $('div.card-box:visible').find("input").attr('disabled') !== "disabled") {
+            } else {
+                if (actionInstance.customProperties[3].value == 'Yes' && $('div.card-box:visible').find("input").attr('disabled') !== "disabled") {
 
-                $('#exampleModalCenter').find('#exampleModalLongTitle').html('<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" class="gt gs mt--4"><g><g><g><path d="M507.113,428.415L287.215,47.541c-6.515-11.285-18.184-18.022-31.215-18.022c-13.031,0-24.7,6.737-31.215,18.022L4.887,428.415c-6.516,11.285-6.516,24.76,0,36.044c6.515,11.285,18.184,18.022,31.215,18.022h439.796c13.031,0,24.7-6.737,31.215-18.022C513.629,453.175,513.629,439.7,507.113,428.415z M481.101,449.441c-0.647,1.122-2.186,3.004-5.202,3.004H36.102c-3.018,0-4.556-1.881-5.202-3.004c-0.647-1.121-1.509-3.394,0-6.007L250.797,62.559c1.509-2.613,3.907-3.004,5.202-3.004c1.296,0,3.694,0.39,5.202,3.004L481.1,443.434C482.61,446.047,481.748,448.32,481.101,449.441z"/><rect x="240.987" y="166.095" width="30.037" height="160.197" /><circle cx="256.005" cy="376.354" r="20.025" /></g></g></g > <g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg > Answer response!');
-                $('#exampleModalCenter').find('.modal-body').html(`<label><strong>Incorrect</strong></label><p><label>Correct Answer</label><br>${correct_value}</p>`);
-                $('#exampleModalCenter').find('.modal-footer').html('<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Continue</button>');
-                $('#exampleModalCenter').find('#save-changes').hide();
-                $('#exampleModalCenter').modal('show');
+                    $('#exampleModalCenter').find('#exampleModalLongTitle').html('<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" class="gt gs mt--4"><g><g><g><path d="M507.113,428.415L287.215,47.541c-6.515-11.285-18.184-18.022-31.215-18.022c-13.031,0-24.7,6.737-31.215,18.022L4.887,428.415c-6.516,11.285-6.516,24.76,0,36.044c6.515,11.285,18.184,18.022,31.215,18.022h439.796c13.031,0,24.7-6.737,31.215-18.022C513.629,453.175,513.629,439.7,507.113,428.415z M481.101,449.441c-0.647,1.122-2.186,3.004-5.202,3.004H36.102c-3.018,0-4.556-1.881-5.202-3.004c-0.647-1.121-1.509-3.394,0-6.007L250.797,62.559c1.509-2.613,3.907-3.004,5.202-3.004c1.296,0,3.694,0.39,5.202,3.004L481.1,443.434C482.61,446.047,481.748,448.32,481.101,449.441z"/><rect x="240.987" y="166.095" width="30.037" height="160.197" /><circle cx="256.005" cy="376.354" r="20.025" /></g></g></g > <g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg > Answer response!');
+                    $('#exampleModalCenter').find('.modal-body').html(`<label class="text-danger"><i class="fa fa-remove" aria-hidden="true"></i> <strong>Incorrect</strong></label><p><label>Correct Answer</label><br>${correct_value}</p>`);
+                    $('#exampleModalCenter').find('.modal-footer').html('<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Continue</button>');
+                    $('#exampleModalCenter').find('#save-changes').hide();
+                    $('#exampleModalCenter').modal('show');
 
-                $("#exampleModalCenter").on("hidden.bs.modal", function() {
-                    // put your default event here
-                    $('div.card-box:visible').find("input").each(function(ind, ele) {
-                        $(ele).prop('disabled', true);
+                    $("#exampleModalCenter").on("hidden.bs.modal", function () {
+                        // put your default event here
+                        $('div.card-box:visible').find("input").each(function (ind, ele) {
+                            $(ele).prop('disabled', true);
+                        });
+                        var limit = $('#y').text();
+                        console.log(`${pagination} < ${limit}`);
+
+                        if ((pagination) < limit) {
+                            $('#next').prop('disabled', false);
+                            $('#back').prop('disabled', false);
+
+                            $('div.section-2 > .container:first > div.card-box:nth-child(' + pagination + ')').hide();
+                            console.log(`next section ${$('div.section-2 > .container:first > div.card-box').length} <= ${pagination}`)
+                            if ($('div.section-2 > .container:first > div.card-box').length <= pagination) {
+                                createTrainingSection(pagination);
+                            } else {
+                                console.log(pagination);
+                                $('div.section-2 > .container:first > div.card-box:nth-child(' + (pagination + 1) + ')').show();
+                                console.log(pagination + 1);
+                            }
+                            $('#x').text((pagination + 1));
+
+                            summary_answer_resp.push(true);
+
+                        } else {
+                            /* Show Summary */
+                            // $('#next').prop('disabled', true);
+                        }
                     });
+                } else {
                     var limit = $('#y').text();
                     console.log(`${pagination} < ${limit}`);
 
@@ -584,37 +617,23 @@ $(document).on('click', '#next', function() {
                     } else {
                         /* Show Summary */
                         $('#next').prop('disabled', true);
+                        loadSummaryView();
                     }
-                });
-            } else {
-                var limit = $('#y').text();
-                console.log(`${pagination} < ${limit}`);
-
-                if ((pagination) < limit) {
-                    $('#next').prop('disabled', false);
-                    $('#back').prop('disabled', false);
-
-                    $('div.section-2 > .container:first > div.card-box:nth-child(' + pagination + ')').hide();
-                    console.log(`next section ${$('div.section-2 > .container:first > div.card-box').length} <= ${pagination}`)
-                    if ($('div.section-2 > .container:first > div.card-box').length <= pagination) {
-                        createTrainingSection(pagination);
-                    } else {
-                        console.log(pagination);
-                        $('div.section-2 > .container:first > div.card-box:nth-child(' + (pagination + 1) + ')').show();
-                        console.log(pagination + 1);
-                    }
-                    $('#x').text((pagination + 1));
-
-                    summary_answer_resp.push(true);
-
-                } else {
-                    /* Show Summary */
-                    $('#next').prop('disabled', true);
-                    loadSummaryView();
                 }
-            }
 
+            }
+        } else {
+            $('#exampleModalCenter').find('#exampleModalLongTitle').html('<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" class="gt gs mt--4"><g><g><g><path d="M507.113,428.415L287.215,47.541c-6.515-11.285-18.184-18.022-31.215-18.022c-13.031,0-24.7,6.737-31.215,18.022L4.887,428.415c-6.516,11.285-6.516,24.76,0,36.044c6.515,11.285,18.184,18.022,31.215,18.022h439.796c13.031,0,24.7-6.737,31.215-18.022C513.629,453.175,513.629,439.7,507.113,428.415z M481.101,449.441c-0.647,1.122-2.186,3.004-5.202,3.004H36.102c-3.018,0-4.556-1.881-5.202-3.004c-0.647-1.121-1.509-3.394,0-6.007L250.797,62.559c1.509-2.613,3.907-3.004,5.202-3.004c1.296,0,3.694,0.39,5.202,3.004L481.1,443.434C482.61,446.047,481.748,448.32,481.101,449.441z"/><rect x="240.987" y="166.095" width="30.037" height="160.197" /><circle cx="256.005" cy="376.354" r="20.025" /></g></g></g > <g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg > Note!');
+            $('#exampleModalCenter').find('.modal-body').html(`<label>Please choose any choice<label>`);
+            $('#exampleModalCenter').find('.modal-footer').html('<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Continue</button>');
+            $('#exampleModalCenter').find('#save-changes').hide();
+            $('#exampleModalCenter').modal('show');
+
+            $("#exampleModalCenter").on("hidden.bs.modal", function () {
+                $('#next').attr('disabled', false);
+            });
         }
+
         if ((pagination + 1) >= limit) {
             loadSummaryView();
         }
@@ -649,7 +668,7 @@ $(document).on('click', '#next', function() {
     }
 });
 
-$(document).on('click', '#back', function() {
+$(document).on('click', '#back', function () {
     console.log(`${pagination} <= 1`)
     if (pagination < 1) {
         $('#back').prop('disabled', true);

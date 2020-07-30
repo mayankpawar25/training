@@ -353,6 +353,7 @@ strong {
     transition: all ease-in-out 0.3s;
     height: 32px;
     padding: 8px 12px;
+    color: #F3F2F1;
 }
 
 .in-t:focus {
@@ -475,7 +476,7 @@ strong {
 }
 
 .wh {
-    fill: #ffffff;
+    fill: #f3f2f1;
 }
 
 .input-tpt svg {
@@ -503,7 +504,7 @@ strong {
 }
 
 .footer svg {
-    fill: #fff;
+    fill: rgb(98, 100, 167) !important;
 }
 
 .footer {
@@ -807,4 +808,24 @@ a:hover {
 .close:hover {
     color: #BEBBB8;
     text-decoration: none;
+}
+hr {
+    margin-top: .5rem;
+    margin-bottom: .5rem;
+    }
+
+    .modal-title svg {
+    margin-top: -5px;
+}
+a#back-setting svg {
+    margin-top: -3px;
+}
+.section-2 {
+    width: 100%;
+}
+.section-1 {
+    width: 100%;
+}
+.section-3 {
+    width: 100%;
 }

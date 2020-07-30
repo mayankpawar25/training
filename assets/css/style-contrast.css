@@ -72,7 +72,7 @@ body {
 .close {
     float: right;
     text-decoration: none;
-    color: #BEBBB8;
+    color: #ffffff;
 }
 
 form {
@@ -92,10 +92,15 @@ form {
 
 .teams-link:hover {
     color: #ffff01;
-}
+}   
 
 .font-sm {
     font-size: 13px;
+}
+.btn-primary.disabled, .btn-primary:disabled {
+    color: #fff;
+    background-color: transparent;
+    border-color: #007bff;
 }
 
 .btn-primary {
@@ -129,22 +134,21 @@ form {
 }
 
 .btn-primary-outline {
-    color: #4e508a !important;
+    color: #fff !important;
     background-color: transparent !important;
-    border-color: #6264a7 !important;
+    border-color: #fff !important;
 }
 
 .btn-primary-outline:hover {
-    color: #4e508a !important;
-    background-color: transparent !important;
-    border-color: #4e508a !important;
+    color: #000000 !important;
+    background-color: #ffff01 !important;
+    border-color: #000000 !important;
 }
 
 .btn-primary-outline:focus {
-    color: #4e508a !important;
-    background-color: transparent !important;
-    border-color: #4e508a !important;
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, .5) !important;
+   color: #000000 !important;
+    background-color: #ffff01 !important;
+    border-color: #000000 !important;
 }
 
 .form-group {
@@ -255,6 +259,9 @@ label {
 .btn {
     padding: .25rem 1.5rem;
 }
+.text-danger{
+    color: #1aebff !important;
+}
 
 .alert {
     position: relative;
@@ -326,7 +333,7 @@ strong {
 }
 
 .modal-content .app-black-color {
-    color: #BEBBB8;
+    color: #ffffff;
 }
 
 .modal-header {
@@ -410,6 +417,9 @@ strong {
 
 .in-t.danger:focus {
     border-bottom: 2px solid #1aebff !important;
+    color: #ffffff;
+    border-top: 1px solid #1aebff !important;
+
 }
 
 .input-group-tpt {
@@ -631,7 +641,7 @@ button:focus {
     width: 14px;
     background-color: transparent;
     border-radius: 50%;
-    border: 1px solid #BEBBB8
+    border: 1px solid #ffffff
 }
 
 .custom-radio input:focus~.radio-block {
@@ -694,7 +704,7 @@ button:focus {
     height: 16px;
     width: 16px;
     background-color: transparent;
-    border: 1px solid #BEBBB8;
+    border: 1px solid #ffffff;
     border-radius: 2px;
 }
 
@@ -787,7 +797,7 @@ a:hover {
 }
 
 .table {
-    color: #BEBBB8;
+    color: #ffffff;
 }
 
 .nav-tabs {
@@ -800,7 +810,7 @@ a:hover {
 }
 
 .close:hover {
-    color: #BEBBB8;
+    color: #ffffff;
     text-decoration: none;
 }
 
@@ -827,6 +837,9 @@ a:hover {
     border-bottom: 1px solid #ffff01 !important;
     border-top: 1px solid #ffff01 !important;
     transition: all ease-in-out 0.3s;
+    color: #ffffff;
+
+
 }
 
 .btn-outline-secondary {
@@ -838,4 +851,23 @@ a:hover {
     color: #000000;
     background-color: #fff;
     border-color: #fff;
+}
+
+hr {
+    margin-top: .5rem;
+    margin-bottom: .5rem;
+     
+    border-top: 1px solid #fff;
+}
+.section-2 {
+    width: 100%;
+}
+.section-1 {
+    width: 100%;
+}
+.section-3 {
+    width: 100%;
+}
+.text-success {
+    color: #ffff01 !important;
 }

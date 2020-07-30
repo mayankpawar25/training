@@ -26,6 +26,10 @@ $(document).on("click", "#add-questions", function () {
     $('form.sec1').append(add_question_button);
     $('form.sec1').append(question_footer);
 
+    if ($('form.sec1 > div.question-section').length == 1) {
+        $('form.sec1 > div.question-section').find('.container').addClass('pt-4');
+    }
+
     var question_counter = 0;
     $("div.question-container:visible").each(function (index, elem) {
         question_counter = index + 1;
@@ -138,7 +142,7 @@ $(document).on("click", ".add-options", function () {
 </g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg> Notice!`);
         $("#exampleModalCenter")
             .find(".modal-body")
-            .html("Maximum 10 options allowed for a Question");
+            .html("Maximum 10 options allowed for a question");
         $("#exampleModalCenter")
             .find(".modal-footer")
             .html(
@@ -980,8 +984,6 @@ function calc_date_diff(start, end) {
     }
 }
 
-
-
 function numbertowords(num) {
     switch (num) {
         case 1:
@@ -1147,7 +1149,7 @@ var training_section_view = `<div class="section-2" style="display:none">
         </div>`;
 
 // Question
-var questions_section = `<div class="question-section pt-4">
+var questions_section = `<div class="question-section">
         <div class="container question-container">
             <div class="card-box card-border card-bg">
                 <div class="form-group">
