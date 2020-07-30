@@ -10,7 +10,7 @@ let setting_text = ' Due in 1 week, Results visible to everyone';
 let question_section = '';
 let opt = '';
 
-/***********************************  Add Questions *********************************/
+/***********************************  Manage Questions *********************************/
 $(document).on("click", "#add-questions", function () {
 
     $('.section-2').hide();
@@ -388,6 +388,7 @@ $(document).on("click", "#question-done", function () {
     $('#question-done').prop('disabled', false);
 
 });
+/****************************  Manage Questions Ends ***************************/
 
 
 /***********************************  Add Text *********************************/
@@ -500,6 +501,10 @@ $(document).on("click", "#confirm-delete-text", function () {
     $('div.card-box[data-id="' + eve + '"]').remove();
     $("form.sec1 div.section-2:visible div#root .card-box.training-card-section").each(function (index, obj) {
         $(this).find('span.counter').text(index);
+        $(this).attr("data-id", "text-section-" + index);
+        if ($(this).find('div.question-inputs').length > 0) {
+            $(this).find('div.question-inputs').attr('id', 'quest-text-' + index);
+        }
     });
 
     $("#exampleModalCenter").modal("hide");
@@ -576,6 +581,7 @@ $(document).on("click", "#next", function () {
         $("#exampleModalCenter").modal("show");
     }
 });
+/********************************  Add Text Ends *************************************/
 
 
 /***********************************  Submit Training *********************************/
@@ -798,6 +804,9 @@ function generateGUID() {
     });
 }
 
+/***********************************  Submit Training Ends *******************************/
+
+
 $(document).ready(function () {
     let request = new actionSDK.GetContext.Request();
     getTheme(request);
@@ -839,6 +848,8 @@ async function getTheme(request) {
     }, 1000);
 }
 
+/***********************************  Other Actions *******************************/
+
 $(document).on("click", "#back", function () {
     $(".section-2").hide();
     $(".section-2-footer").hide();
@@ -856,69 +867,6 @@ $(document).on("click", "#back-setting", function () {
     $('#due').text(setting_text);
 });
 
-$(document).on("change", "#expiry-date, #expiry-time, .visible-to", function () {
-    var end = new Date($('input[name="expiry_date"]').val() + ' ' + $('input[name="expiry_time"]').val());
-    var start = new Date();
-    var days = calc_date_diff(start, end);
-
-    if (days == undefined) {
-
-        $("#exampleModalCenter")
-            .find("#exampleModalLongTitle")
-            .html('<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" class="gt gs mt--4"><g><g><g><path d="M507.113,428.415L287.215,47.541c-6.515-11.285-18.184-18.022-31.215-18.022c-13.031,0-24.7,6.737-31.215,18.022L4.887,428.415c-6.516,11.285-6.516,24.76,0,36.044c6.515,11.285,18.184,18.022,31.215,18.022h439.796c13.031,0,24.7-6.737,31.215-18.022C513.629,453.175,513.629,439.7,507.113,428.415z M481.101,449.441c-0.647,1.122-2.186,3.004-5.202,3.004H36.102c-3.018,0-4.556-1.881-5.202-3.004c-0.647-1.121-1.509-3.394,0-6.007L250.797,62.559c1.509-2.613,3.907-3.004,5.202-3.004c1.296,0,3.694,0.39,5.202,3.004L481.1,443.434C482.61,446.047,481.748,448.32,481.101,449.441z"/><rect x="240.987" y="166.095" width="30.037" height="160.197" /><circle cx="256.005" cy="376.354" r="20.025" /></g></g></g > <g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg > Notice!');
-        $("#exampleModalCenter")
-            .find(".modal-body")
-            .html("<p><strong>Invalid Date or Time!</strong></p><p>It must be greater than current date and time.</p>");
-        $("#exampleModalCenter")
-            .find(".modal-footer")
-            .html(
-                '<button type="button" class="btn btn-outline-secondary btn-sm" data-dismiss="modal">Close</button>'
-            );
-        $("#exampleModalCenter").modal("show");
-    } else {
-        var result_visible = $('.visible-to:checked').val() == 'Everyone' ? 'Results visible to everyone' : 'Results visible to only me';
-        console.log('due: ' + days + ', ' + result_visible);
-        setting_text = ' Due in ' + days + ', ' + result_visible;
-    }
-});
-
-function calc_date_diff(start, end) {
-    var days = (end - start) / (1000 * 60 * 60 * 24);
-    console.log('days: ' + days);
-    if (days > 6) {
-        var weeks = Math.ceil(days) / 7;
-        return Math.floor(weeks) + ' week';
-    } else {
-        if (days < 1) {
-            var t1 = start.getTime();
-            var t2 = end.getTime();
-
-            var minsDiff = Math.floor((t2 - t1) / 1000 / 60);
-            var hourDiff = Math.floor(minsDiff / 60);
-            minsDiff = minsDiff % 60;
-
-            if (hourDiff > 1) {
-                var hourText = 'hours';
-            } else {
-                var hourText = 'hour';
-            }
-            if (hourDiff > 1) {
-                var minuteText = 'minutes';
-            } else {
-                var minuteText = 'minute';
-            }
-            if (hourDiff > 0 && minsDiff > 0) {
-                return hourDiff + ' ' + hourText + ', ' + minsDiff + ' ' + minuteText;
-            } else if (hourDiff > 0 && minsDiff <= 0) {
-                return hourDiff + ' ' + hourText;
-            } else if (hourDiff <= 0 && minsDiff > 0) {
-                return minsDiff + ' ' + minuteText;
-            }
-        } else {
-            return Math.ceil(days) + ' days';
-        }
-    }
-}
 
 $(document).on('click', '#next1', function () {
     $("input[type='text']").removeClass("danger");
@@ -958,6 +906,81 @@ $(document).on('click', '#next1', function () {
         });
 });
 
+/***********************************  Other Actions Ends ***************************/
+
+
+/***********************************  Settings ***************************/
+
+$(document).on("change", "#expiry-date, #expiry-time, .visible-to", function () {
+    var end = new Date($('input[name="expiry_date"]').val() + ' ' + $('input[name="expiry_time"]').val());
+    var start = new Date();
+    var days = calc_date_diff(start, end);
+
+    if (days == undefined) {
+
+        $("#exampleModalCenter")
+            .find("#exampleModalLongTitle")
+            .html('<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" class="gt gs mt--4"><g><g><g><path d="M507.113,428.415L287.215,47.541c-6.515-11.285-18.184-18.022-31.215-18.022c-13.031,0-24.7,6.737-31.215,18.022L4.887,428.415c-6.516,11.285-6.516,24.76,0,36.044c6.515,11.285,18.184,18.022,31.215,18.022h439.796c13.031,0,24.7-6.737,31.215-18.022C513.629,453.175,513.629,439.7,507.113,428.415z M481.101,449.441c-0.647,1.122-2.186,3.004-5.202,3.004H36.102c-3.018,0-4.556-1.881-5.202-3.004c-0.647-1.121-1.509-3.394,0-6.007L250.797,62.559c1.509-2.613,3.907-3.004,5.202-3.004c1.296,0,3.694,0.39,5.202,3.004L481.1,443.434C482.61,446.047,481.748,448.32,481.101,449.441z"/><rect x="240.987" y="166.095" width="30.037" height="160.197" /><circle cx="256.005" cy="376.354" r="20.025" /></g></g></g > <g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg > Notice!');
+        $("#exampleModalCenter")
+            .find(".modal-body")
+            .html("<p><strong>Invalid Date or Time!</strong></p><p>It must be greater than current date and time.</p>");
+        $("#exampleModalCenter")
+            .find(".modal-footer")
+            .html(
+                '<button type="button" class="btn btn-outline-secondary btn-sm" data-dismiss="modal">Close</button>'
+            );
+        $("#exampleModalCenter").modal("show");
+    } else {
+        var result_visible = $('.visible-to:checked').val() == 'Everyone' ? 'Results visible to everyone' : 'Results visible to only me';
+        console.log('due: ' + days + ', ' + result_visible);
+        setting_text = ' Due in ' + days + ', ' + result_visible;
+    }
+});
+
+/********************************  Settings Edns ***********************/
+
+
+/***********************************  Methods ***************************/
+
+function calc_date_diff(start, end) {
+    var days = (end - start) / (1000 * 60 * 60 * 24);
+    console.log('days: ' + days);
+    if (days > 6) {
+        var weeks = Math.ceil(days) / 7;
+        return Math.floor(weeks) + ' week';
+    } else {
+        if (days < 1) {
+            var t1 = start.getTime();
+            var t2 = end.getTime();
+
+            var minsDiff = Math.floor((t2 - t1) / 1000 / 60);
+            var hourDiff = Math.floor(minsDiff / 60);
+            minsDiff = minsDiff % 60;
+
+            if (hourDiff > 1) {
+                var hourText = 'hours';
+            } else {
+                var hourText = 'hour';
+            }
+            if (hourDiff > 1) {
+                var minuteText = 'minutes';
+            } else {
+                var minuteText = 'minute';
+            }
+            if (hourDiff > 0 && minsDiff > 0) {
+                return hourDiff + ' ' + hourText + ', ' + minsDiff + ' ' + minuteText;
+            } else if (hourDiff > 0 && minsDiff <= 0) {
+                return hourDiff + ' ' + hourText;
+            } else if (hourDiff <= 0 && minsDiff > 0) {
+                return minsDiff + ' ' + minuteText;
+            }
+        } else {
+            return Math.ceil(days) + ' days';
+        }
+    }
+}
+
+
 
 function numbertowords(num) {
     switch (num) {
@@ -996,6 +1019,10 @@ function numbertowords(num) {
     }
 }
 
+/***********************************  Methods Ends ***************************/
+
+
+/***********************************  HTML Section ***************************/
 
 /*  HTML Sections  */
 // form
@@ -1438,3 +1465,6 @@ var modal_section = `<div class="modal fade" id="exampleModalCenter" tabindex="-
             </div>
         </div>
     </div>`;
+
+
+/***********************************  HTML Section Ends***************************/
