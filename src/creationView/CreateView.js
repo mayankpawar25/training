@@ -106,7 +106,7 @@ $(document).on("click", ".remove-question", function () {
 $(document).on("click", "#delete-question", function () {
     var element = $(this).attr('data-id');
     $("#exampleModalCenter").modal("hide");
-    $('#' + element).parents('div.question-section.pt-4').remove();
+    $('#' + element).parents('div.question-section').remove();
     var question_counter;
     $("div.question-container:visible").each(function (index, elem) {
         question_counter = index + 1;

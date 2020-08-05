@@ -720,10 +720,15 @@ button:focus {
 .d-table label {
     display: table-cell;
     vertical-align: top;
+    width: 100%;
 }
 
 .getresult span {
     color: #6264A7;
     text-decoration: underline;
     cursor: pointer;
+}
+
+.custom-radio input:disabled ~ .radio-block {
+  background-color: rgb(98, 100, 167, 0.5);
 }

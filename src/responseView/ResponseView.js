@@ -631,6 +631,7 @@ $(document).on('click', '#next', function () {
 
             $("#exampleModalCenter").on("hidden.bs.modal", function () {
                 $('#next').attr('disabled', false);
+                // $('.card-box.card-border.card-bg:visible').find('input').prop('disabled', false);
             });
         }
 

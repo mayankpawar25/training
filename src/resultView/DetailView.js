@@ -265,137 +265,10 @@ $(document).on("click", ".getresult", function () {
 function createReponderQuestionView(userId) {
     $("div#root > div.question-content").html("");
     var count = 1;
-
-    actionInstance.dataTables.forEach((dataTable) => {
-        // var $linebreak = $("<br>");
-        // $qDiv.append($linebreak);
-
-        // total = Object.keys(dataTable.dataColumns).length;
-
-        dataTable.dataColumns.forEach((question, ind) => {
-            var $cardDiv = $('<div class="card-box card-border card-bg"></div>');
-            var $rowdDiv = $('<div class="row"></div>');
-            var $qDiv = $('<div class="col-sm-12"></div>');
-            $cardDiv.append($rowdDiv);
-            $rowdDiv.append($qDiv);
-
-            var count = ind + 1;
-            var $dflex = $("<div class='d-flex'></div>");
-            var $questionHeading = $('<label></label>');
-            console.log("question: " + JSON.stringify(question));
-
-            $questionHeading.append(
-                "<strong>" + count + ". " + question.displayName + "</strong>"
-            );
-
-            $dflex.append($questionHeading);
-
-            $dflex.append('<label class="float-right" id="status-' + question.name + '"></label>')
-
-            $cardDiv.append($dflex);
-
-
-            question.options.forEach((option) => {
-                /* User Responded */
-                var userResponse = [];
-                var userResponseAnswer = "";
-                for (let i = 0; i < actionDataRowsLength; i++) {
-                    if (actionDataRows[i].creatorId == userId) {
-                        userResponse = actionDataRows[i].columnValues;
-                        var userResponseLength = Object.keys(userResponse).length;
-
-                        for (var j = 1; j <= userResponseLength; j++) {
-                            // console.log('isJson(userResponse[' + j + '])' + isJson(userResponse[j]));
-                            if (isJson(userResponse[j])) {
-                                var userResponseAns = JSON.parse(userResponse[j]);
-                                var userResponseAnsLen = userResponseAns.length;
-                                // console.log('userResponseAns: ' + JSON.stringify(userResponseAns));
-                                // console.log('userResponseAnsLen: ' + userResponseAnsLen);
-                                if (userResponseAnsLen > 1) {
-                                    console.log("here if block");
-                                    for (var k = 0; k < userResponseAnsLen; k++) {
-                                        console.log("userResponseAns[k]" + userResponseAns[k]);
-                                        if (userResponseAns[k] == option.name) {
-                                            userResponseAnswer = userResponseAns[k];
-                                            // console.log('if userResponseAnswer' + k + ': ' + JSON.stringify(userResponseAnswer));
-                                        } else {
-                                            continue;
-                                        }
-                                    }
-                                } else {
-                                    userResponseAnswer = userResponseAns;
-                                    // console.log('userResponseAnswer: ' + userResponseAnswer);
-                                }
-                            } else {
-                                console.log(
-                                    "Else: userResponseAns - " + JSON.stringify(userResponse)
-                                );
-                                if (userResponse[j] == option.name) {
-                                    userResponseAnswer = userResponse[j];
-                                    // console.log('userResponseAnswer: ' + userResponseAnswer);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                /* Correct Answer */
-                var correctResponse = JSON.parse(
-                    actionInstance.customProperties[4].value
-                );
-                var correctResponseLength = Object.keys(correctResponse).length;
-                var correctAnswer = "";
-                for (let j = 0; j < correctResponseLength; j++) {
-                    console.log("correctResponse: " + JSON.stringify(correctResponse[j]));
-
-                    var correctResponseAns = correctResponse[j];
-                    console.log(
-                        "correctResponseAns: " + JSON.stringify(correctResponseAns)
-                    );
-                    var correctResponseAnsLen = correctResponseAns.length;
-                    for (let k = 0; k < correctResponseAnsLen; k++) {
-                        if (correctResponseAns[k] == option.name) {
-                            console.log("correctAnswer: " + JSON.stringify(correctAnswer));
-                            correctAnswer = correctResponseAns[k];
-                        }
-                    }
-                }
-
-                var $radioOption = getOptions(
-                    option.displayName,
-                    question.name,
-                    option.name,
-                    userResponseAnswer,
-                    correctAnswer
-                );
-                console.log($radioOption);
-                $cardDiv.append($radioOption);
-
-                // console.log("name: " + "#status-" + question.name);
-                // console.log("answer_is: " + JSON.stringify(answer_is));
-                $cardDiv.find("#status-" + question.name).html(`<span class="${answer_is == 'Correct' ? 'text-success' : 'text-danger'}">${answer_is}</span>`);
-            });
-            if (answer_is == "Correct") {
-                score++;
-            }
-            $("#root").append($cardDiv);
-        });
-        count++;
-    });
-    $("#root").append('<div class="ht-100"></div>');
-
-    total = count;
-    var scorePercentage = Math.round((score / total) * 100);
-
-    // $("#root > div.progress-section").after(`<div class=""><h4><strong>Score: </strong>${scorePercentage}%</h4></div>`);
-}
-
-function createQuestionView(userId) {
+    answer_is = "";
     total = 0;
     score = 0;
-    $("div#root > div.question-content").html("");
-    var count = 1;
-    // console.log(JSON.stringify(actionInstance));
+
     actionInstance.dataTables.forEach((dataTable) => {
         // var $linebreak = $("<br>");
         // $qDiv.append($linebreak);
@@ -406,6 +279,8 @@ function createQuestionView(userId) {
             var $cardDiv = $('<div class="card-box card-bg card-border"></div>');
             var $rowdDiv = $('<div class="row"></div>');
             var $qDiv = $('<div class="col-sm-12"></div>');
+            var $dflex = $("<div class='d-table'></div>");
+
             $cardDiv.append($rowdDiv);
             $rowdDiv.append($qDiv);
 
@@ -414,9 +289,11 @@ function createQuestionView(userId) {
             $questionHeading.append(
                 "<strong>" + count + ". " + question.displayName + "</strong>"
             );
-            $cardDiv.append($questionHeading);
 
-            $cardDiv.append(
+            $cardDiv.append($dflex);
+            $dflex.append($questionHeading);
+
+            $dflex.append(
                 '<label class="float-right" id="status-' + question.name + '"></label>'
             );
 
@@ -487,16 +364,277 @@ function createQuestionView(userId) {
                     }
                 }
 
-                var $radioOption = getOptions(
-                    option.displayName,
-                    question.name,
-                    option.name,
-                    userResponseAnswer,
-                    correctAnswer
+
+                if (question.options.length > 1) {
+                    var $radioOption = getOptions(
+                        option.displayName,
+                        question.name,
+                        option.name,
+                        userResponseAnswer,
+                        correctAnswer,
+                    );
+                    console.log($radioOption);
+                    $cardDiv.append($radioOption);
+
+                    $cardDiv.find("#status-" + question.name).html(`<span class="${answer_is == 'Correct' ? 'text-success' : 'text-danger'}">${answer_is}</span>`);
+                }
+            });
+
+            if (answer_is == "Correct") {
+                score++;
+            }
+            $("#root").append($cardDiv);
+        });
+        count++;
+    });
+
+    /*     
+        actionInstance.dataTables.forEach((dataTable) => {
+            // var $linebreak = $("<br>");
+            // $qDiv.append($linebreak);
+
+            // total = Object.keys(dataTable.dataColumns).length;
+
+            dataTable.dataColumns.forEach((question, ind) => {
+                var $cardDiv = $('<div class="card-box card-border card-bg"></div>');
+                var $rowdDiv = $('<div class="row"></div>');
+                var $qDiv = $('<div class="col-sm-12"></div>');
+                $cardDiv.append($rowdDiv);
+                $rowdDiv.append($qDiv);
+
+                var count = ind + 1;
+                var $dflex = $("<div class='d-table'></div>");
+                var $questionHeading = $('<label></label>');
+                console.log("question: " + JSON.stringify(question));
+
+                $questionHeading.append(
+                    "<strong>" + count + ". " + question.displayName + "</strong>"
                 );
-                console.log($radioOption);
-                $cardDiv.append($radioOption);
-                $cardDiv.find("#status-" + question.name).html(`<span class="${answer_is == 'Correct' ? 'text-success' : 'text-danger'}">${answer_is}</span>`);
+
+                $dflex.append($questionHeading);
+
+                $dflex.append('<label class="float-right" id="status-' + question.name + '"></label>')
+
+                $cardDiv.append($dflex);
+
+
+                question.options.forEach((option) => {
+                    // User Responded
+                    var userResponse = [];
+                    var userResponseAnswer = "";
+                    for (let i = 0; i < actionDataRowsLength; i++) {
+                        if (actionDataRows[i].creatorId == userId) {
+                            userResponse = actionDataRows[i].columnValues;
+                            var userResponseLength = Object.keys(userResponse).length;
+
+                            for (var j = 1; j <= userResponseLength; j++) {
+                                // console.log('isJson(userResponse[' + j + '])' + isJson(userResponse[j]));
+                                if (isJson(userResponse[j])) {
+                                    var userResponseAns = JSON.parse(userResponse[j]);
+                                    var userResponseAnsLen = userResponseAns.length;
+                                    // console.log('userResponseAns: ' + JSON.stringify(userResponseAns));
+                                    // console.log('userResponseAnsLen: ' + userResponseAnsLen);
+                                    if (userResponseAnsLen > 1) {
+                                        console.log("here if block");
+                                        for (var k = 0; k < userResponseAnsLen; k++) {
+                                            console.log("userResponseAns[k]" + userResponseAns[k]);
+                                            if (userResponseAns[k] == option.name) {
+                                                userResponseAnswer = userResponseAns[k];
+                                                // console.log('if userResponseAnswer' + k + ': ' + JSON.stringify(userResponseAnswer));
+                                            } else {
+                                                continue;
+                                            }
+                                        }
+                                    } else {
+                                        userResponseAnswer = userResponseAns;
+                                        // console.log('userResponseAnswer: ' + userResponseAnswer);
+                                    }
+                                } else {
+                                    console.log(
+                                        "Else: userResponseAns - " + JSON.stringify(userResponse)
+                                    );
+                                    if (userResponse[j] == option.name) {
+                                        userResponseAnswer = userResponse[j];
+                                        // console.log('userResponseAnswer: ' + userResponseAnswer);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Correct Answer
+                    var correctResponse = JSON.parse(
+                        actionInstance.customProperties[4].value
+                    );
+                    var correctResponseLength = Object.keys(correctResponse).length;
+                    var correctAnswer = "";
+                    for (let j = 0; j < correctResponseLength; j++) {
+                        console.log("correctResponse: " + JSON.stringify(correctResponse[j]));
+
+                        var correctResponseAns = correctResponse[j];
+                        console.log(
+                            "correctResponseAns: " + JSON.stringify(correctResponseAns)
+                        );
+                        var correctResponseAnsLen = correctResponseAns.length;
+                        for (let k = 0; k < correctResponseAnsLen; k++) {
+                            if (correctResponseAns[k] == option.name) {
+                                console.log("correctAnswer: " + JSON.stringify(correctAnswer));
+                                correctAnswer = correctResponseAns[k];
+                            }
+                        }
+                    }
+
+                    var $radioOption = getOptions(
+                        option.displayName,
+                        question.name,
+                        option.name,
+                        userResponseAnswer,
+                        correctAnswer
+                    );
+                    console.log($radioOption);
+                    $cardDiv.append($radioOption);
+
+                    // console.log("name: " + "#status-" + question.name);
+                    // console.log("answer_is: " + JSON.stringify(answer_is));
+
+                    if (question.options.length > 1) {
+                        $cardDiv.find("#status-" + question.name).html(`<span class="${answer_is == 'Correct' ? 'text-success' : 'text-danger'}">${answer_is}</span>`);
+                    }
+
+                });
+                if (answer_is == "Correct") {
+                    score++;
+                }
+                $("#root").append($cardDiv);
+            });
+            count++;
+        });
+ */
+
+    $("#root").append('<div class="ht-100"></div>');
+
+    total = count;
+    var scorePercentage = Math.round((score / total) * 100);
+
+    // $("#root > div.progress-section").after(`<div class=""><h4><strong>Score: </strong>${scorePercentage}%</h4></div>`);
+}
+
+function createQuestionView(userId) {
+    total = 0;
+    score = 0;
+    $("div#root > div.question-content").html("");
+    var count = 1;
+    // console.log(JSON.stringify(actionInstance));
+    actionInstance.dataTables.forEach((dataTable) => {
+        // var $linebreak = $("<br>");
+        // $qDiv.append($linebreak);
+
+        dataTable.dataColumns.forEach((question, ind) => {
+            answer_is = "";
+
+            var $cardDiv = $('<div class="card-box card-bg card-border"></div>');
+            var $rowdDiv = $('<div class="row"></div>');
+            var $qDiv = $('<div class="col-sm-12"></div>');
+            var $dflex = $("<div class='d-table'></div>");
+
+            $cardDiv.append($rowdDiv);
+            $rowdDiv.append($qDiv);
+
+            var count = ind + 1;
+            var $questionHeading = $("<label></label>");
+            $questionHeading.append(
+                "<strong>" + count + ". " + question.displayName + "</strong>"
+            );
+
+            $cardDiv.append($dflex);
+            $dflex.append($questionHeading);
+
+            $dflex.append(
+                '<label class="float-right" id="status-' + question.name + '"></label>'
+            );
+
+            question.options.forEach((option) => {
+                /* User Responded */
+                var userResponse = [];
+                var userResponseAnswer = "";
+
+                for (let i = 0; i < actionDataRowsLength; i++) {
+                    if (actionDataRows[i].creatorId == userId) {
+                        userResponse = actionDataRows[i].columnValues;
+                        var userResponseLength = Object.keys(userResponse).length;
+
+                        for (var j = 1; j <= userResponseLength; j++) {
+                            // console.log('isJson(userResponse[' + j + '])' + isJson(userResponse[j]));
+                            if (isJson(userResponse[j])) {
+                                var userResponseAns = JSON.parse(userResponse[j]);
+                                var userResponseAnsLen = userResponseAns.length;
+                                // console.log('userResponseAns: ' + JSON.stringify(userResponseAns));
+                                // console.log('userResponseAnsLen: ' + userResponseAnsLen);
+                                if (userResponseAnsLen > 1) {
+                                    console.log("here if block");
+                                    for (var k = 0; k < userResponseAnsLen; k++) {
+                                        console.log("userResponseAns[k]" + userResponseAns[k]);
+                                        if (userResponseAns[k] == option.name) {
+                                            userResponseAnswer = userResponseAns[k];
+                                            // console.log('if userResponseAnswer' + k + ': ' + JSON.stringify(userResponseAnswer));
+                                        } else {
+                                            continue;
+                                        }
+                                    }
+                                } else {
+                                    userResponseAnswer = userResponseAns;
+                                    // console.log('userResponseAnswer: ' + userResponseAnswer);
+                                }
+                            } else {
+                                console.log(
+                                    "Else: userResponseAns - " + JSON.stringify(userResponse)
+                                );
+                                if (userResponse[j] == option.name) {
+                                    userResponseAnswer = userResponse[j];
+                                    // console.log('userResponseAnswer: ' + userResponseAnswer);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                /* Correct Answer */
+                var correctResponse = JSON.parse(
+                    actionInstance.customProperties[4].value
+                );
+                var correctResponseLength = Object.keys(correctResponse).length;
+                var correctAnswer = "";
+                for (let j = 0; j < correctResponseLength; j++) {
+                    console.log("correctResponse: " + JSON.stringify(correctResponse[j]));
+
+                    var correctResponseAns = correctResponse[j];
+                    console.log(
+                        "correctResponseAns: " + JSON.stringify(correctResponseAns)
+                    );
+                    var correctResponseAnsLen = correctResponseAns.length;
+                    for (let k = 0; k < correctResponseAnsLen; k++) {
+                        if (correctResponseAns[k] == option.name) {
+                            console.log("correctAnswer: " + JSON.stringify(correctAnswer));
+                            correctAnswer = correctResponseAns[k];
+                        }
+                    }
+                }
+
+
+
+                if (question.options.length > 1) {
+                    var $radioOption = getOptions(
+                        option.displayName,
+                        question.name,
+                        option.name,
+                        userResponseAnswer,
+                        correctAnswer
+                    );
+                    console.log($radioOption);
+                    $cardDiv.append($radioOption);
+
+                    $cardDiv.find("#status-" + question.name).html(`<span class="${answer_is == 'Correct' ? 'text-success' : 'text-danger'}">${answer_is}</span>`);
+                }
             });
 
             if (answer_is == "Correct") {
@@ -515,11 +653,16 @@ function createQuestionView(userId) {
     // $("#root > div:first").after(`<div class=""><h4><strong>Score: </strong>${scorePercentage}%</h4></div>`);
 }
 
-function getOptions(text, name, id, userResponse, correctAnswer) {
+function getOptions(text, name, id, userResponse, correctAnswer, is_text = '') {
+    if (is_text == true) {
+        // This is for text block 
+        return true;
+    }
     console.log(
         text + ", " + name + ", " + id + ", " + userResponse + ", " + correctAnswer
     );
     var $oDiv = $('<div class="form-group"></div>');
+
     /*  If answer is correct  and answered */
     if (userResponse == id && correctAnswer == id) {
         $oDiv.append(
